@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { HomeComponent } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
+import { LoginComponent } from './components/login/login.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { GraphComponent } from './components/graph/graph.component';
     TutorialDetailsComponent,
     TutorialsListComponent,
     HomeComponent,
-    GraphComponent
+    GraphComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
