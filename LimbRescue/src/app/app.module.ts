@@ -11,6 +11,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { HomeComponent } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
+import { MachineLearningComponent } from './components/machine-learning/machine-learning.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { LoginComponent } from './components/login/login.component';
     TutorialsListComponent,
     HomeComponent,
     GraphComponent,
-    LoginComponent
+    LoginComponent,
+    MachineLearningComponent
   ],
   imports: [
     BrowserModule,

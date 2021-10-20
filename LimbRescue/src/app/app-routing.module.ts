@@ -6,6 +6,7 @@ import { AddTutorialComponent } from './components/add-tutorial/add-tutorial.com
 import { HomeComponent } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
+import { MachineLearningComponent } from './components/machine-learning/machine-learning.component';
 
 
 const routes: Routes = [
@@ -15,7 +16,8 @@ const routes: Routes = [
   { path: 'add', component: AddTutorialComponent },
   { path: 'home', component: HomeComponent },
   { path: 'graph', component: GraphComponent },
-  { path: 'login', component: LoginComponent }
+  { path: 'login', component: LoginComponent },
+  { path: 'machine-learning', component: MachineLearningComponent }
 ];
 
 @NgModule({
