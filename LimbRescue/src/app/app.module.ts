@@ -12,6 +12,7 @@ import { HomeComponent } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
 import { MachineLearningComponent } from './components/machine-learning/machine-learning.component';
+import { ResultsComponent } from './components/results/results.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { MachineLearningComponent } from './components/machine-learning/machine-
     HomeComponent,
     GraphComponent,
     LoginComponent,
-    MachineLearningComponent
+    MachineLearningComponent,
+    ResultsComponent
   ],
   imports: [
     BrowserModule,
