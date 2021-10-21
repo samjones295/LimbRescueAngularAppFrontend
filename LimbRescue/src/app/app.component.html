@@ -18,6 +18,13 @@
         <a routerLink="results" class="nav-link">Results</a>
       </li>
     </div>
+    <div>
+      <ul class="navbar-nav navbar-collapse justify-content-end">
+        <li>
+            <a *ngIf="isLoggedIn" class="nav-link" href="/login" (click)=handleLogout()>Logout</a>
+        </li>
+    </ul>
+    </div>
   </nav>
 
   <div class="container mt-3">
