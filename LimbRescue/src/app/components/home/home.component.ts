@@ -1,22 +1,19 @@
-import {AfterViewInit, Component, ViewChild} from '@angular/core';
+import { SelectionModel } from '@angular/cdk/collections';
+import {AfterViewInit, Component, ViewChild, OnInit} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
+import { MatTable } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 
 export interface UserData {
-  id: string;
-  name: string;
-  progress: string;
-  fruit: string;
+  subject_number: string;
+  laterality: string;
+  date: string;
 }
 
 /** Constants used to fill up our data base. */
-const FRUITS: string[] = [
-  'blueberry', 'lychee', 'kiwi', 'mango', 'peach', 'lime', 'pomegranate', 'pineapple'
-];
-const NAMES: string[] = [
-  'Maia', 'Asher', 'Olivia', 'Atticus', 'Amelia', 'Jack', 'Charlotte', 'Theodore', 'Isla', 'Oliver',
-  'Isabella', 'Jasper', 'Cora', 'Levi', 'Violet', 'Arthur', 'Mia', 'Thomas', 'Elizabeth'
+const LATERALITY: string[] = [
+  'Left', 'Right', 'Bilateral'
 ];
 
 @Component({
@@ -26,23 +23,27 @@ const NAMES: string[] = [
 })
 export class HomeComponent implements AfterViewInit {
 
-  displayedColumns: string[] = ['id', 'name', 'progress', 'fruit'];
-  dataSource: MatTableDataSource<UserData>;
+  displayedColumns: string[] = ['select','subject number', 'date', 'laterality', 'show graph', 'add to group', 'comments'];
+  dataSource: MatTableDataSource<UserData> = new MatTableDataSource();
+  selection = new SelectionModel<UserData>(true, []);
+  users = Array.from({length: 100}, (_, k) => createNewUser(k + 1));
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
+  @ViewChild(MatSort, { static: true }) sort!: MatSort;
+  @ViewChild(MatTable) matTable!: MatTable<UserData>;
 
   constructor() {
-    // Create 100 users
-    const users = Array.from({length: 100}, (_, k) => createNewUser(k + 1));
 
-    // Assign the data to the data source for the table to render
-    this.dataSource = new MatTableDataSource(users);
+  }
+
+  ngOnInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.dataSource.data = this.users;
+    this.matTable.renderRows()
   }
 
   applyFilter(event: Event) {
@@ -54,16 +55,39 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
+    /** Whether the number of selected elements matches the total number of rows. */
+    isAllSelected() {
+      const numSelected = this.selection.selected.length;
+      const numRows = this.dataSource.data.length;
+      return numSelected === numRows;
+    }
+  
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    masterToggle() {
+      if (this.isAllSelected()) {
+        this.selection.clear();
+        return;
+      }
+  
+      this.selection.select(...this.dataSource.data);
+    }
+  
+    /** The label for the checkbox on the passed row */
+    checkboxLabel(row?: UserData): string {
+      if (!row) {
+        return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+      }
+      return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.subject_number + 1}`;
+    }
+
 }
 
-function createNewUser(id: number): UserData {
-  const name = NAMES[Math.round(Math.random() * (NAMES.length - 1))] + ' ' +
-    NAMES[Math.round(Math.random() * (NAMES.length - 1))].charAt(0) + '.';
+function createNewUser(subject_number: number): UserData {
+  const laterality = LATERALITY[Math.round(Math.random() * (LATERALITY.length - 1))];
 
   return {
-    id: id.toString(),
-    name: name,
-    progress: Math.round(Math.random() * 100).toString(),
-    fruit: FRUITS[Math.round(Math.random() * (FRUITS.length - 1))]
+    subject_number: subject_number.toString(),
+    laterality: laterality,
+    date: Math.round(0.5+ Math.random() * 12).toString()+'/'+Math.round(0.5+ Math.random() * 31).toString()+'/'+Math.round(2012.5+ Math.random() * 9).toString()
   };
 }
