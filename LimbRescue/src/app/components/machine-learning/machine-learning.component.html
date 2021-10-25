@@ -1,1 +1,37 @@
-<p>machine-learning works!</p>
+<div class="mat-elevation-z8" style="margin-top: 10%; padding-top: 1%; margin-left: 120px; margin-right: 120px;">
+    <h2 style="text-align: center;"> Run ML Algorithm</h2>
+    <form name="mlForm" style="text-align: center;padding-top: 2%;">
+
+        <mat-form-field appearance="fill">
+            <mat-label>Select Group</mat-label>
+            <mat-select *ngFor="let group of groups" [value]="group.value">
+                <mat-option>
+                    {{group.viewValue}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+            <mat-label>Select Algorithm</mat-label>
+            <mat-select *ngFor="let algo of algos" [value]="algo.value">
+                <mat-option>
+                    {{algo.viewValue}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field> 
+
+        <mat-form-field appearance="fill">
+            <mat-label>Select Data Type</mat-label>
+            <mat-select *ngFor="let dt of dataManipulation" [value]="dt.value">
+                <mat-option>
+                    {{dt.viewValue}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </form>
+    <div style="text-align: center;padding-bottom: 1%;">
+        <button mat-raised-button color="primary">Run</button>
+    </div>
+    
+</div>
+

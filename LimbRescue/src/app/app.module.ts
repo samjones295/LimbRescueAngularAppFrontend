@@ -18,6 +18,10 @@ import { LoginComponent } from './components/login/login.component';
 import { MachineLearningComponent } from './components/machine-learning/machine-learning.component';
 import { ResultsComponent } from './components/results/results.component';
 import { HttpInterceptorService } from './http-interceptor.service';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatOptionModule } from '@angular/material/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -30,9 +34,13 @@ import { HttpInterceptorService } from './http-interceptor.service';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatOptionModule,
     MatInputModule,
     MatTableModule,
     MatPaginatorModule,
