@@ -1,9 +1,10 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import {AfterViewInit, Component, ViewChild, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ViewChild, OnInit, Inject} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-machine-learning',
@@ -12,8 +13,7 @@ import {MatTableDataSource} from '@angular/material/table';
 })
 export class MachineLearningComponent implements OnInit {
 
-  constructor() { }
-
+  constructor() {}
   ngOnInit(): void {
   }
 

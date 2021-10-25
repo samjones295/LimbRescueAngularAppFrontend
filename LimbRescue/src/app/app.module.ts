@@ -22,6 +22,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -30,11 +31,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     GraphComponent,
     LoginComponent,
     MachineLearningComponent,
-    ResultsComponent
+    ResultsComponent,
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    MatDialogModule,
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
