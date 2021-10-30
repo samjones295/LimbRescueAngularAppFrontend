@@ -23,6 +23,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
+import { ChartsModule } from 'ng2-charts';
 
 @NgModule({
   declarations: [
@@ -49,7 +50,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatSortModule,
     MatCardModule,
     MatButtonModule,
-    MatCheckboxModule
+    MatCheckboxModule, 
+    ChartsModule
   ],
   providers: [    {
     provide: HTTP_INTERCEPTORS,
