@@ -23,7 +23,7 @@ const LATERALITY: string[] = [
 })
 export class HomeComponent implements AfterViewInit {
 
-  displayedColumns: string[] = ['select','subject number', 'date', 'laterality', 'show graph', 'add to group', 'comments'];
+  displayedColumns: string[] = ['select','subject number', 'date', 'lymphadema', 'laterality', 'show graph', 'add to group', 'comments'];
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource();
   selection = new SelectionModel<UserData>(true, []);
   users = Array.from({length: 100}, (_, k) => createNewUser(k + 1));
