@@ -939,4 +939,27 @@ constructor() { }
 
 ngOnInit() {
   }
+  readings =[
+    {value: 1, viewValue: "Reading 1"},
+    {value: 2, viewValue: "Reading 2"},
+    {value: 3, viewValue: "Reading 3"}
+  ]
+
+  patients = [
+    {value: 123, viewValue: 123},
+    {value: 234, viewValue: 234}
+  ]
+  toggleSelect(e: any){
+    var readingSelect = document.getElementById("reading-select-field")
+    if(readingSelect?.style.display == "inline-block"){
+      readingSelect!.style.display = "none"
+    }else{
+      readingSelect!.style.display = "inline-block"
+    }
+  }
+
+  toggleButton(e: any){
+    var runButton = document.getElementById("run-button")
+    runButton!.style.display = "inline-block"
+  }
 }
