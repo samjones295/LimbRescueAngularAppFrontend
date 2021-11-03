@@ -4,6 +4,8 @@ import {MatPaginator} from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
+import { Reading } from 'src/app/models/reading.model';
+import { ReadingService } from 'src/app/services/reading.service';
 
 export interface UserData {
   subject_number: string;
@@ -23,20 +25,23 @@ const LATERALITY: string[] = [
 })
 export class HomeComponent implements AfterViewInit {
 
+  readings?:  Reading[];
+  currentReading: Reading = {};
+
   displayedColumns: string[] = ['select','subject number', 'date', 'lymphadema', 'laterality', 'show graph', 'add to group', 'comments'];
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource();
-  selection = new SelectionModel<UserData>(true, []);
+  selection_subject = new SelectionModel<UserData>(true, []);
+  selection_lymphedema = new SelectionModel<UserData>(true, []);
   users = Array.from({length: 100}, (_, k) => createNewUser(k + 1));
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
   @ViewChild(MatTable) matTable!: MatTable<UserData>;
 
-  constructor() {
-
-  }
+  constructor(private readingService: ReadingService) {}
 
   ngOnInit() {
+    this.retrieveReadings()
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
@@ -44,6 +49,17 @@ export class HomeComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.dataSource.data = this.users;
     this.matTable.renderRows()
+  }
+
+  retrieveReadings() {
+    this.readingService.getAll().subscribe(
+      data => {
+        this.readings = data;
+        console.log(data);
+      },
+      error => {
+        console.log(error);
+      });
   }
 
   applyFilter(event: Event) {
@@ -56,28 +72,53 @@ export class HomeComponent implements AfterViewInit {
   }
 
     /** Whether the number of selected elements matches the total number of rows. */
-    isAllSelected() {
-      const numSelected = this.selection.selected.length;
+    isAllSelectedSubject() {
+      const numSelected = this.selection_subject.selected.length;
       const numRows = this.dataSource.data.length;
       return numSelected === numRows;
     }
+
+    /** Whether the number of selected elements matches the total number of rows. */
+    isAllSelectedLymphedema() {
+      const numSelected = this.selection_lymphedema.selected.length;
+      const numRows = this.dataSource.data.length;
+      return numSelected === numRows;
+      }
   
     /** Selects all rows if they are not all selected; otherwise clear selection. */
-    masterToggle() {
-      if (this.isAllSelected()) {
-        this.selection.clear();
+    masterToggleSubject() {
+      if (this.isAllSelectedSubject()) {
+        this.selection_subject.clear();
         return;
       }
   
-      this.selection.select(...this.dataSource.data);
+      this.selection_subject.select(...this.dataSource.data);
+    }
+
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    masterToggleLymphedema() {
+      if (this.isAllSelectedLymphedema()) {
+        this.selection_lymphedema.clear();
+        return;
+      }
+  
+      this.selection_lymphedema.select(...this.dataSource.data);
     }
   
     /** The label for the checkbox on the passed row */
-    checkboxLabel(row?: UserData): string {
+    checkboxLabelSubject(row?: UserData): string {
       if (!row) {
-        return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+        return `${this.isAllSelectedSubject() ? 'deselect' : 'select'} all`;
       }
-      return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.subject_number + 1}`;
+      return `${this.selection_subject.isSelected(row) ? 'deselect' : 'select'} row ${row.subject_number + 1}`;
+    }
+
+    /** The label for the checkbox on the passed row */
+    checkboxLabelLymphedema(row?: UserData): string {
+      if (!row) {
+        return `${this.isAllSelectedLymphedema() ? 'deselect' : 'select'} all`;
+      }
+      return `${this.selection_lymphedema.isSelected(row) ? 'deselect' : 'select'} row ${row.subject_number + 1}`;
     }
 
 }
