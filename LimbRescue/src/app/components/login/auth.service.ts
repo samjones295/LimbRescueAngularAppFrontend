@@ -18,11 +18,13 @@ export class AuthenticationService {
   }
 
   authenticationService(username: string, password: string) {
+    let authToken = this.createBasicAuthToken(username, password)
     return this.http.get(`http://localhost:8080/api/v1/basicauth`,
-      { headers: { authorization: this.createBasicAuthToken(username, password) } }).pipe(map((res) => {
+      { headers: { authorization: authToken } }).pipe(map((res) => {
         this.username = username;
         this.password = password;
         this.registerSuccessfulLogin(username, password);
+        sessionStorage.setItem('authToken', authToken)
       }));
   }
 
@@ -36,6 +38,7 @@ export class AuthenticationService {
 
   logout() {
     sessionStorage.removeItem(this.USER_NAME_SESSION_ATTRIBUTE_NAME);
+    sessionStorage.removeItem('authToken')
     this.username = null;
     this.password = null;
   }

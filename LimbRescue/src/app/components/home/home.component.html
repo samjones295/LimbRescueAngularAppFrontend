@@ -27,28 +27,33 @@
                 </mat-checkbox>
                 </td>
             </ng-container>
+
             <!-- Subject Number Column -->
-            <ng-container matColumnDef="subject number">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header class="data-field"> Subject Number </th>
-                <td mat-cell *matCellDef="let row" class="data-field"> {{row.subject_number}} </td>
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="data-field"> ID </th>
+                <td mat-cell *matCellDef="let row" class="data-field"> {{row.id}} </td>
+            </ng-container>
+
+            <!-- Subject Number Column -->
+            <ng-container matColumnDef="patient number">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="data-field"> Patient Number </th>
+                <td mat-cell *matCellDef="let row" class="data-field"> {{row.patient_no}} </td>
             </ng-container>
         
             <!-- Date Column -->
             <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="data-field"> Date </th>
-                <td mat-cell *matCellDef="let row" class="data-field"> {{row.date}} </td>
+                <td mat-cell *matCellDef="let row" class="data-field"> {{row.date_created}} </td>
             </ng-container>
 
-            <ng-container matColumnDef="lymphadema">
+<!--             <ng-container matColumnDef="lymphadema">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="data-field"> Lymphadema </th>
                 <td mat-cell *matCellDef="let row">
-                    <mat-checkbox (click)="$event.stopPropagation()"
-                                    (change)="$event ? selection_lymphedema.toggle(row) : null"
-                                    [checked]="selection_lymphedema.isSelected(row)"
-                                    [aria-label]="checkboxLabelLymphedema(row)">
+                    <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection_lymphedema.toggle(row) : null"
+                        [checked]="selection_lymphedema.isSelected(row)" [aria-label]="checkboxLabelLymphedema(row)">
                     </mat-checkbox>
                 </td>
-            </ng-container>
+            </ng-container> -->
         
             <!-- Laterality Column -->
             <ng-container matColumnDef="laterality">
@@ -76,7 +81,7 @@
                 <td mat-cell *matCellDef="let row" class="comment-field">
                     <mat-form-field class="full-width" appearance="fill">
                         <mat-label>Comments</mat-label>
-                        <textarea matInput class="full-width" placeholder="Please enter your notes here"></textarea>
+                        <textarea matInput readonly class="full-width" placeholder="Please update the reading to add comments">{{row.comments}}</textarea>
                     </mat-form-field>
                 </td>
             </ng-container>

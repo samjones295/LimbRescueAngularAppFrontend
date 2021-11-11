@@ -7,16 +7,6 @@ import {MatTableDataSource} from '@angular/material/table';
 import { Reading } from 'src/app/models/reading.model';
 import { ReadingService } from 'src/app/services/reading.service';
 
-export interface UserData {
-  subject_number: string;
-  laterality: string;
-  date: string;
-}
-
-/** Constants used to fill up our data base. */
-const LATERALITY: string[] = [
-  'Left', 'Right', 'Bilateral'
-];
 
 @Component({
   selector: 'app-home',
@@ -25,33 +15,39 @@ const LATERALITY: string[] = [
 })
 export class HomeComponent implements AfterViewInit {
 
-  readings?:  Reading[];
+  readings!:  Reading[];
   currentReading: Reading = {};
 
-  displayedColumns: string[] = ['select','subject number', 'date', 'lymphadema', 'laterality', 'show graph', 'add to group', 'comments'];
-  dataSource: MatTableDataSource<UserData> = new MatTableDataSource();
-  selection_subject = new SelectionModel<UserData>(true, []);
-  selection_lymphedema = new SelectionModel<UserData>(true, []);
-  users = Array.from({length: 100}, (_, k) => createNewUser(k + 1));
+  displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'add to group', 'comments'];
+  dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
+  selection_subject = new SelectionModel<Reading>(true, []);
+  selection_lymphedema = new SelectionModel<Reading>(true, []);
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
-  @ViewChild(MatTable) matTable!: MatTable<UserData>;
+  @ViewChild(MatTable) matTable!: MatTable<Reading>;
 
   constructor(private readingService: ReadingService) {}
 
   ngOnInit() {
-    this.retrieveReadings()
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
   ngAfterViewInit() {
-    this.dataSource.data = this.users;
+    this.readingService.getAll().subscribe(
+      data => {
+        console.log(data)
+        this.dataSource.data = data
+      },
+      error => {
+        console.log(error);
+      }
+    )
     this.matTable.renderRows()
   }
 
-  retrieveReadings() {
+/*   retrieveReadings() {
     this.readingService.getAll().subscribe(
       data => {
         this.readings = data;
@@ -60,7 +56,7 @@ export class HomeComponent implements AfterViewInit {
       error => {
         console.log(error);
       });
-  }
+  } */
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -106,29 +102,19 @@ export class HomeComponent implements AfterViewInit {
     }
   
     /** The label for the checkbox on the passed row */
-    checkboxLabelSubject(row?: UserData): string {
+    checkboxLabelSubject(row?: Reading): string {
       if (!row) {
         return `${this.isAllSelectedSubject() ? 'deselect' : 'select'} all`;
       }
-      return `${this.selection_subject.isSelected(row) ? 'deselect' : 'select'} row ${row.subject_number + 1}`;
+      return `${this.selection_subject.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
     }
 
     /** The label for the checkbox on the passed row */
-    checkboxLabelLymphedema(row?: UserData): string {
+    checkboxLabelLymphedema(row?: Reading): string {
       if (!row) {
         return `${this.isAllSelectedLymphedema() ? 'deselect' : 'select'} all`;
       }
-      return `${this.selection_lymphedema.isSelected(row) ? 'deselect' : 'select'} row ${row.subject_number + 1}`;
+      return `${this.selection_lymphedema.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
     }
 
-}
-
-function createNewUser(subject_number: number): UserData {
-  const laterality = LATERALITY[Math.round(Math.random() * (LATERALITY.length - 1))];
-
-  return {
-    subject_number: subject_number.toString(),
-    laterality: laterality,
-    date: Math.round(0.5+ Math.random() * 12).toString()+'/'+Math.round(0.5+ Math.random() * 31).toString()+'/'+Math.round(2012.5+ Math.random() * 9).toString()
-  };
 }
