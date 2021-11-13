@@ -13,11 +13,11 @@ export interface ResultsData {
 
 /** Constants used to fill up our data base. */
 const GROUPS: string[] = [
-  'Group 1', 'Group 2', 'Group 3', 'Group 4', 'Group 5', 'Group 6', 'Group 7', 'Group 8'
+  'Group 1', 'Group 2', 'Group 3', 'Group 4'
 ];
 
 const ALGORITHMS: string[] = [
-  'Algorithm 1', 'Algorithm 2', 'Algorithm 3', 'Algorithm 4', 'Algorithm 5', 'Algorithm 6', 'Algorithm 7', 'Algorithm 8'
+  'Support Vector Machine', 'Random Forest', 'Naive Bayes', 'Multi Layer Perceptron'
 ];
 
 @Component({

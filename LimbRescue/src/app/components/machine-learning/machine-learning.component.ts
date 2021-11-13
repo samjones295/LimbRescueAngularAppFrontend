@@ -20,11 +20,14 @@ export class MachineLearningComponent implements OnInit {
   groups =[
     {value: 1, viewValue: "Group 1"},
     {value: 2, viewValue: "Group 2"},
-    {value: 3, viewValue: "Group 3"}
+    {value: 3, viewValue: "Group 3"},
+    {value: 4, viewValue: "Group 4"}
   ]
   algos = [
-    {value: 1, viewValue: "Algo 1"},
-    {value: 2, viewValue: "Algo 2"},
+    {value: 1, viewValue: "Support Vector Machine"},
+    {value: 2, viewValue: "Random Forest"},
+    {value: 3, viewValue: "Naive Bayes"},
+    {value: 4, viewValue: "Multi Layer Perceptron"}
   ]
   dataManipulation = [
     {value: "D", viewValue: "Derived"},
