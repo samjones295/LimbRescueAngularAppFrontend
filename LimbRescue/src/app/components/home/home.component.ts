@@ -1,11 +1,13 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import {AfterViewInit, Component, ViewChild, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ViewChild, Inject} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { Reading } from 'src/app/models/reading.model';
 import { ReadingService } from 'src/app/services/reading.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 
 @Component({
@@ -27,7 +29,7 @@ export class HomeComponent implements AfterViewInit {
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
   @ViewChild(MatTable) matTable!: MatTable<Reading>;
 
-  constructor(private readingService: ReadingService) {}
+  constructor(private readingService: ReadingService, public dialog: MatDialog) {}
 
   ngOnInit() {
     this.dataSource.paginator = this.paginator;
@@ -46,17 +48,35 @@ export class HomeComponent implements AfterViewInit {
     )
     this.matTable.renderRows()
   }
+  openDialog(id: number) {
+    this.readingService.get(id).subscribe(
+      reading_data => {
+        const dialogRef = this.dialog.open(ReadingDialog, {
+          data: reading_data,
+          disableClose: true,
+          autoFocus: true,
+          width: '400px',
+        });
+        dialogRef.afterClosed().subscribe(
+          output_data => {
+            this.readingService.put(output_data, id)
+            window.location.reload()
+          }
+        )
+    })
+  }
 
-/*   retrieveReadings() {
+  getAllReadings(){
     this.readingService.getAll().subscribe(
       data => {
-        this.readings = data;
-        console.log(data);
+        console.log(data)
+        return data
       },
       error => {
         console.log(error);
-      });
-  } */
+      }
+    )
+  }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -118,3 +138,56 @@ export class HomeComponent implements AfterViewInit {
     }
 
 }
+
+@Component({
+  selector: 'reading-dialog',
+  templateUrl: 'reading-dialog.html',
+  styleUrls: ['./home.component.sass'],
+})
+export class ReadingDialog {
+  id: string
+  patient_no: string | undefined
+  date_created: Date | undefined
+  laterality: string | undefined
+  comments: string | undefined
+
+  form!: FormGroup
+
+  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<ReadingDialog>, @Inject(MAT_DIALOG_DATA) public data: Reading) {
+    this.id = data.id
+    this.patient_no = data.patient_no
+    this.date_created = data.date_created
+    this.laterality = data.laterality
+    this.comments = data.comments
+  }
+
+  ngOnInit() {
+    this.form = this.fb.group({
+        id: [this.id, []],
+        patient_no: [this.patient_no, []],
+        date_created: [this.date_created, []],
+        laterality: [this.laterality, []],
+        comments: [this.comments, []]
+    });
+  }
+
+  save() {
+    this.dialogRef.close(this.form.value);
+  }
+
+  close() {
+    this.dialogRef.close();
+  }
+}
+
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'YYYY-MM-DD',
+  },
+  display: {
+    dateInput: 'YYYY-MM-DD',
+    monthYearLabel: 'MMMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY'
+  },
+};
