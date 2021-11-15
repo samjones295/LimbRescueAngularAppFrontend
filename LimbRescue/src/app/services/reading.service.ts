@@ -13,6 +13,6 @@ export class ReadingService {
   constructor(private http: HttpClient) { }
 
   getAll(): Observable<Reading[]> {
-    return this.http.get<Reading[]>(baseUrl+'/allreadings');
+    return this.http.get<Reading[]>(baseUrl+'/readings');
   }
 }
