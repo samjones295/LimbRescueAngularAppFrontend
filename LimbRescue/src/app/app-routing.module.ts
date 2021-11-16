@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthGuardService as AuthGuard } from './components/login/auth-guard.service'
+import { LoggedInAuthGuardService as LoggedInAuthGuard } from './components/login/logged-in-auth-guard.service'
 import { HomeComponent } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
@@ -8,12 +10,13 @@ import { ResultsComponent } from './components/results/results.component';
 
 
 const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
-  { path: 'graph', component: GraphComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'machine-learning', component: MachineLearningComponent },
-  { path: 'results', component: ResultsComponent}
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'graph', component: GraphComponent, canActivate: [AuthGuard] },
+  { path: 'login', component: LoginComponent, canActivate: [LoggedInAuthGuard] },
+  { path: 'machine-learning', component: MachineLearningComponent, canActivate: [AuthGuard] },
+  { path: 'results', component: ResultsComponent, canActivate: [AuthGuard]},
+  { path: '**', redirectTo: 'home' }
 ];
 
 @NgModule({

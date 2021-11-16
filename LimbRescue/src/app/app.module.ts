@@ -26,10 +26,12 @@ import { AppComponent } from './app.component';
 import { HomeComponent, ReadingDialog, MY_DATE_FORMATS } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
+import { AuthGuardService } from './components/login/auth-guard.service';
 import { MachineLearningComponent } from './components/machine-learning/machine-learning.component';
 import { ResultsComponent } from './components/results/results.component';
 import { HttpInterceptorService } from './http-interceptor.service';
 import { ChartsModule } from 'ng2-charts';
+import { LoggedInAuthGuardService } from './components/login/logged-in-auth-guard.service';
 
 @NgModule({
   declarations: [
@@ -71,7 +73,9 @@ import { ChartsModule } from 'ng2-charts';
     },
     {
       provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS
-    }
+    },
+    AuthGuardService,
+    LoggedInAuthGuardService
   ],
   bootstrap: [AppComponent]
 })
