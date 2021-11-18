@@ -6,9 +6,23 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { Reading } from 'src/app/models/reading.model';
+import { Group } from 'src/app/models/group.model'
 import { ReadingService } from 'src/app/services/reading.service';
+import { GroupService } from 'src/app/services/group.service'
 import { FormBuilder, FormGroup } from '@angular/forms';
 
+
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'YYYY-MM-DD',
+  },
+  display: {
+    dateInput: 'YYYY-MM-DD',
+    monthYearLabel: 'MMMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY'
+  },
+};
 
 @Component({
   selector: 'app-home',
@@ -23,13 +37,13 @@ export class HomeComponent implements AfterViewInit {
   displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
   selection_subject = new SelectionModel<Reading>(true, []);
-  selection_lymphedema = new SelectionModel<Reading>(true, []);
+  //selection_lymphedema = new SelectionModel<Reading>(true, []);
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
   @ViewChild(MatTable) matTable!: MatTable<Reading>;
 
-  constructor(private readingService: ReadingService, public dialog: MatDialog) {}
+  constructor(private readingService: ReadingService, private groupService: GroupService, public dialog: MatDialog) {}
 
   ngOnInit() {
     this.dataSource.paginator = this.paginator;
@@ -48,10 +62,13 @@ export class HomeComponent implements AfterViewInit {
     )
     this.matTable.renderRows()
   }
-  openDialog(id: number) {
+
+
+
+  openUpdateReadingDialog(id: number) {
     this.readingService.get(id).subscribe(
       reading_data => {
-        const dialogRef = this.dialog.open(ReadingDialog, {
+        const dialogRef = this.dialog.open(CreateGroupFromReadingsDialog, {
           data: reading_data,
           disableClose: true,
           autoFocus: true,
@@ -66,6 +83,51 @@ export class HomeComponent implements AfterViewInit {
     })
   }
 
+  openCreateGroupFromReadingsDialog() {
+    let selected_subjects = this.getSelectedSubjects()
+    let subject_ids = this.getSelectionArrayIds(selected_subjects)
+
+    let group = new Group()
+    group.reading_ids = subject_ids
+
+    const dialogRef = this.dialog.open(CreateGroupFromReadingsDialog, {
+      data: group,
+      disableClose: true,
+      autoFocus: true,
+      width: '500px',
+    });
+    dialogRef.afterClosed().subscribe(
+      output_data => {
+        if(output_data != undefined){
+          output_data.id = 0
+          this.groupService.post(output_data)
+        }
+      }
+    )
+  }
+
+  openAddReadingsToExistingGroupDialog() {
+    let selected_subjects = this.getSelectedSubjects()
+    let subject_ids = this.getSelectionArrayIds(selected_subjects)
+
+    let group = new Group()
+    group.reading_ids = subject_ids
+
+    const dialogRef = this.dialog.open(AddReadingsToExistingGroupDialog, {
+      data: group,
+      disableClose: true,
+      autoFocus: true,
+      width: '500px',
+    });
+    dialogRef.afterClosed().subscribe(
+      output_data => {
+        if(output_data != undefined){
+          console.log(output_data)
+        }
+      }
+    )
+  }
+
   getAllReadings(){
     this.readingService.getAll().subscribe(
       data => {
@@ -77,6 +139,10 @@ export class HomeComponent implements AfterViewInit {
       }
     )
   }
+
+
+
+  // Table filtering and selectiing below
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -93,13 +159,6 @@ export class HomeComponent implements AfterViewInit {
       const numRows = this.dataSource.data.length;
       return numSelected === numRows;
     }
-
-    /** Whether the number of selected elements matches the total number of rows. */
-    isAllSelectedLymphedema() {
-      const numSelected = this.selection_lymphedema.selected.length;
-      const numRows = this.dataSource.data.length;
-      return numSelected === numRows;
-      }
   
     /** Selects all rows if they are not all selected; otherwise clear selection. */
     masterToggleSubject() {
@@ -111,16 +170,6 @@ export class HomeComponent implements AfterViewInit {
       this.selection_subject.select(...this.dataSource.data);
     }
 
-    /** Selects all rows if they are not all selected; otherwise clear selection. */
-    masterToggleLymphedema() {
-      if (this.isAllSelectedLymphedema()) {
-        this.selection_lymphedema.clear();
-        return;
-      }
-  
-      this.selection_lymphedema.select(...this.dataSource.data);
-    }
-  
     /** The label for the checkbox on the passed row */
     checkboxLabelSubject(row?: Reading): string {
       if (!row) {
@@ -129,22 +178,57 @@ export class HomeComponent implements AfterViewInit {
       return `${this.selection_subject.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
     }
 
-    /** The label for the checkbox on the passed row */
-    checkboxLabelLymphedema(row?: Reading): string {
-      if (!row) {
-        return `${this.isAllSelectedLymphedema() ? 'deselect' : 'select'} all`;
-      }
-      return `${this.selection_lymphedema.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
+    getSelectedSubjects() {
+      console.log(this.selection_subject.selected)
+      console.log(this.getSelectionArrayIds(this.selection_subject.selected))
+      return this.selection_subject.selected
     }
+    
+    getSelectionArrayIds(arr: Array<Reading>){
+      let reading_ids = ''
+      arr.forEach(item => reading_ids+=item.id+',')
+      reading_ids = reading_ids.substring(0,reading_ids.length - 1)
+      return reading_ids
+    }
+
+    // /** Whether the number of selected elements matches the total number of rows. */
+    // isAllSelectedLymphedema() {
+    //   const numSelected = this.selection_lymphedema.selected.length;
+    //   const numRows = this.dataSource.data.length;
+    //   return numSelected === numRows;
+    //   }
+
+    // /** Selects all rows if they are not all selected; otherwise clear selection. */
+    // masterToggleLymphedema() {
+    //   if (this.isAllSelectedLymphedema()) {
+    //     this.selection_lymphedema.clear();
+    //     return;
+    //   }
+  
+    //   this.selection_lymphedema.select(...this.dataSource.data);
+    // }
+  
+    // /** The label for the checkbox on the passed row */
+    // checkboxLabelLymphedema(row?: Reading): string {
+    //   if (!row) {
+    //     return `${this.isAllSelectedLymphedema() ? 'deselect' : 'select'} all`;
+    //   }
+    //   return `${this.selection_lymphedema.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
+    // }
 
 }
 
+
+///////////////////////////////////////////////
+////         Update Reading Dialog         ////
+///////////////////////////////////////////////
+
 @Component({
-  selector: 'reading-dialog',
-  templateUrl: 'reading-dialog.html',
+  selector: 'update-reading-dialog',
+  templateUrl: 'update-reading-dialog.html',
   styleUrls: ['./home.component.sass'],
 })
-export class ReadingDialog {
+export class UpdateReadingDialog {
   id: string
   patient_no: string | undefined
   date_created: Date | undefined
@@ -153,7 +237,7 @@ export class ReadingDialog {
 
   form!: FormGroup
 
-  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<ReadingDialog>, @Inject(MAT_DIALOG_DATA) public data: Reading) {
+  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<UpdateReadingDialog>, @Inject(MAT_DIALOG_DATA) public data: Reading) {
     this.id = data.id
     this.patient_no = data.patient_no
     this.date_created = data.date_created
@@ -180,14 +264,78 @@ export class ReadingDialog {
   }
 }
 
-export const MY_DATE_FORMATS = {
-  parse: {
-    dateInput: 'YYYY-MM-DD',
-  },
-  display: {
-    dateInput: 'YYYY-MM-DD',
-    monthYearLabel: 'MMMM YYYY',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM YYYY'
-  },
-};
+///////////////////////////////////////////////
+////   Create Group From Selected Dialog   ////
+///////////////////////////////////////////////
+@Component({
+  selector: 'create-group-from-readings-dialog',
+  templateUrl: 'create-group-from-readings-dialog.html',
+  styleUrls: ['./home.component.sass'],
+})
+export class CreateGroupFromReadingsDialog {
+  id: string
+  name: string | undefined
+  reading_ids: string | undefined
+
+  form!: FormGroup
+
+  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<CreateGroupFromReadingsDialog>, @Inject(MAT_DIALOG_DATA) public data: Group) {
+    this.id = data.id
+    this.name = data.name
+    this.reading_ids = data.reading_ids
+  }
+
+  ngOnInit() {
+    this.form = this.fb.group({
+        id: [this.id, []],
+        name: [this.name, []],
+        reading_ids: [this.reading_ids, []]
+    });
+  }
+
+  save() {
+    this.dialogRef.close(this.form.value);
+  }
+
+  close() {
+    this.dialogRef.close();
+  }
+}
+
+///////////////////////////////////////////////////
+////   Add Readings to Existing Group Dialog   ////
+///////////////////////////////////////////////////
+@Component({
+  selector: 'add-readings-to-existing-group-dialog',
+  templateUrl: 'add-readings-to-existing-group-dialog.html',
+  styleUrls: ['./home.component.sass'],
+})
+export class AddReadingsToExistingGroupDialog {
+  id: string
+  name: string | undefined
+  reading_ids: string | undefined
+
+  form!: FormGroup
+
+  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<CreateGroupFromReadingsDialog>, @Inject(MAT_DIALOG_DATA) public data: Group) {
+    this.id = data.id
+    this.name = data.name
+    this.reading_ids = data.reading_ids
+  }
+
+  ngOnInit() {
+    this.form = this.fb.group({
+        id: [this.id, []],
+        name: [this.name, []],
+        reading_ids: [this.reading_ids, []]
+    });
+  }
+
+  save() {
+    this.dialogRef.close(this.form.value);
+  }
+
+  close() {
+    this.dialogRef.close();
+  }
+}

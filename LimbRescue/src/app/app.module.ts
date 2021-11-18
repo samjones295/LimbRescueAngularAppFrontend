@@ -23,7 +23,7 @@ import { MAT_DATE_FORMATS } from '@angular/material/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HomeComponent, ReadingDialog, MY_DATE_FORMATS } from './components/home/home.component';
+import { HomeComponent, UpdateReadingDialog, CreateGroupFromReadingsDialog, MY_DATE_FORMATS, AddReadingsToExistingGroupDialog } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuthGuardService } from './components/login/auth-guard.service';
@@ -37,7 +37,9 @@ import { LoggedInAuthGuardService } from './components/login/logged-in-auth-guar
   declarations: [
     AppComponent,
     HomeComponent,
-    ReadingDialog,
+    UpdateReadingDialog,
+    CreateGroupFromReadingsDialog,
+    AddReadingsToExistingGroupDialog,
     GraphComponent,
     LoginComponent,
     MachineLearningComponent,
