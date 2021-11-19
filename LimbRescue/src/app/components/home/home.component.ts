@@ -4,7 +4,7 @@ import {MatPaginator} from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { Reading } from 'src/app/models/reading.model';
 import { Group } from 'src/app/models/group.model'
 import { ReadingService } from 'src/app/services/reading.service';
@@ -125,20 +125,42 @@ export class HomeComponent implements AfterViewInit {
 
     let group = new Group()
     group.reading_ids = subject_ids
+    this.groupService.getAll().subscribe(groups_array => {
+      let groups = groups_array
+      const dialogRef = this.dialog.open(AddReadingsToExistingGroupDialog, {
+        data: {group, groups},
+        disableClose: true,
+        autoFocus: true,
+        width: '500px',
+      });
+      dialogRef.afterClosed().subscribe(
+        output_data => {
+          if(output_data != undefined){
+            this.groupService.get_by_name(output_data.name).subscribe(data => {
+              let current_ids = data.reading_ids!.split(",").map(Number).sort()
+              let new_ids =  output_data.reading_ids.split(",").map(Number).sort()
+              let combined_ids = current_ids.concat(new_ids.filter((item: any) => current_ids.indexOf(item) < 0))
+              let new_group = new Group()
 
-    const dialogRef = this.dialog.open(AddReadingsToExistingGroupDialog, {
-      data: group,
-      disableClose: true,
-      autoFocus: true,
-      width: '500px',
-    });
-    dialogRef.afterClosed().subscribe(
-      output_data => {
-        if(output_data != undefined){
-          console.log(output_data)
+              new_group.id = data.id
+              new_group.name = data.name
+              new_group.reading_ids = combined_ids.toString()
+
+              this.groupService.put(new_group, data.id!).subscribe(result => {
+                let groupReading = new GroupReading()
+                groupReading.id = 0
+                groupReading.group_id = data.id
+                for(let num of combined_ids){
+                  groupReading.reading_id = num
+                  this.groupReadingService.post(groupReading).subscribe(data => {})
+                }
+              })
+              
+            })
+          }
         }
-      }
-    )
+      )
+    })
   }
 
   getAllReadings(){
@@ -325,20 +347,25 @@ export class AddReadingsToExistingGroupDialog {
   id: number | undefined
   name: string | undefined
   reading_ids: string | undefined
+  groups: Group[]
 
   form!: FormGroup
 
-  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<CreateGroupFromReadingsDialog>, @Inject(MAT_DIALOG_DATA) public data: Group) {
-    this.id = data.id
-    this.name = data.name
-    this.reading_ids = data.reading_ids
+  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<CreateGroupFromReadingsDialog>, @Inject(MAT_DIALOG_DATA) public data : any) {
+    console.log("Constructor")
+    console.log(data)
+    this.id = data.group.id
+    this.name = data.group.name
+    this.reading_ids = data.group.reading_ids
+    this.groups = data.groups
   }
 
   ngOnInit() {
     this.form = this.fb.group({
         id: [this.id, []],
         name: [this.name, []],
-        reading_ids: [this.reading_ids, []]
+        reading_ids: [this.reading_ids, []],
+        groups: [this.groups, []]
     });
   }
 
