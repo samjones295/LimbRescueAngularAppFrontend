@@ -1,5 +1,5 @@
 export class Group {
-    id?: any
+    id?: number
     name?: string
     reading_ids?: string
 }
