@@ -28,7 +28,7 @@ export class GroupService {
     const body = {name: group.name,
                   reading_ids: group.reading_ids
                 }
-    this.http.put(baseUrl+'/group/'+id, body, {observe: 'response'})
+    return this.http.put(baseUrl+'/group/'+id, body, {observe: 'response'})
   }
 
   post(group: Group){
