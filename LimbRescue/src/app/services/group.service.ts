@@ -16,21 +16,25 @@ export class GroupService {
     return this.http.get<Group[]>(baseUrl+'/groups');
   }
 
-  get(id: number): Observable<Group>{
+  get_by_id(id: number): Observable<Group>{
     return this.http.get<Group>(baseUrl+'/group/'+id)
+  }
+
+  get_by_name(name: string): Observable<Group>{
+    return this.http.get<Group>(baseUrl+'/group/'+name)
   }
 
   put(group: Group, id: number){
     const body = {name: group.name,
                   reading_ids: group.reading_ids
                 }
-    this.http.put(baseUrl+'/group/'+id, body, {observe: 'response'}).subscribe()
+    this.http.put(baseUrl+'/group/'+id, body, {observe: 'response'})
   }
 
   post(group: Group){
     const body = {name: group.name,
       reading_ids: group.reading_ids
     }
-    this.http.post(baseUrl+'/group', body, {observe: 'response'}).subscribe()
+    return this.http.post(baseUrl+'/group', body, {observe: 'response'})
   }
 }

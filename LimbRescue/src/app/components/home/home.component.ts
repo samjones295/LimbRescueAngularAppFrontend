@@ -9,7 +9,9 @@ import { Reading } from 'src/app/models/reading.model';
 import { Group } from 'src/app/models/group.model'
 import { ReadingService } from 'src/app/services/reading.service';
 import { GroupService } from 'src/app/services/group.service'
+import { GroupReadingService } from 'src/app/services/group-reading.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { GroupReading } from 'src/app/models/group-reading.model';
 
 
 export const MY_DATE_FORMATS = {
@@ -43,7 +45,7 @@ export class HomeComponent implements AfterViewInit {
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
   @ViewChild(MatTable) matTable!: MatTable<Reading>;
 
-  constructor(private readingService: ReadingService, private groupService: GroupService, public dialog: MatDialog) {}
+  constructor(private readingService: ReadingService, private groupService: GroupService, private groupReadingService: GroupReadingService, public dialog: MatDialog) {}
 
   ngOnInit() {
     this.dataSource.paginator = this.paginator;
@@ -53,7 +55,6 @@ export class HomeComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.readingService.getAll().subscribe(
       data => {
-        console.log(data)
         this.dataSource.data = data
       },
       error => {
@@ -100,7 +101,19 @@ export class HomeComponent implements AfterViewInit {
       output_data => {
         if(output_data != undefined){
           output_data.id = 0
-          this.groupService.post(output_data)
+          let response = this.groupService.post(output_data)
+          response.subscribe(data => {
+            this.groupService.get_by_name(output_data.name).subscribe(result => {
+              let reading_id_arr = result.reading_ids!.split(",").map(Number)
+              let groupReading = new GroupReading()
+              groupReading.id = 0
+              groupReading.group_id = result.id
+              for(let num of reading_id_arr){
+                groupReading.reading_id = num
+                this.groupReadingService.post(groupReading).subscribe(data => {})
+              }
+            })
+          })
         }
       }
     )
@@ -179,8 +192,6 @@ export class HomeComponent implements AfterViewInit {
     }
 
     getSelectedSubjects() {
-      console.log(this.selection_subject.selected)
-      console.log(this.getSelectionArrayIds(this.selection_subject.selected))
       return this.selection_subject.selected
     }
     
@@ -273,7 +284,7 @@ export class UpdateReadingDialog {
   styleUrls: ['./home.component.sass'],
 })
 export class CreateGroupFromReadingsDialog {
-  id: string
+  id: number | undefined
   name: string | undefined
   reading_ids: string | undefined
 
@@ -311,7 +322,7 @@ export class CreateGroupFromReadingsDialog {
   styleUrls: ['./home.component.sass'],
 })
 export class AddReadingsToExistingGroupDialog {
-  id: string
+  id: number | undefined
   name: string | undefined
   reading_ids: string | undefined
 
