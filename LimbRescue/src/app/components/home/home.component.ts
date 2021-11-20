@@ -69,7 +69,7 @@ export class HomeComponent implements AfterViewInit {
   openUpdateReadingDialog(id: number) {
     this.readingService.get(id).subscribe(
       reading_data => {
-        const dialogRef = this.dialog.open(CreateGroupFromReadingsDialog, {
+        const dialogRef = this.dialog.open(UpdateReadingDialog, {
           data: reading_data,
           disableClose: true,
           autoFocus: true,
@@ -77,8 +77,10 @@ export class HomeComponent implements AfterViewInit {
         });
         dialogRef.afterClosed().subscribe(
           output_data => {
-            this.readingService.put(output_data, id)
-            window.location.reload()
+            if(output_data != undefined){
+              this.readingService.put(output_data, id)
+              window.location.reload()
+            }
           }
         )
     })
@@ -352,8 +354,6 @@ export class AddReadingsToExistingGroupDialog {
   form!: FormGroup
 
   constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<CreateGroupFromReadingsDialog>, @Inject(MAT_DIALOG_DATA) public data : any) {
-    console.log("Constructor")
-    console.log(data)
     this.id = data.group.id
     this.name = data.group.name
     this.reading_ids = data.group.reading_ids
