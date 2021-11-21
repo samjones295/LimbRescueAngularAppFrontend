@@ -1,6 +1,9 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Component, OnInit } from '@angular/core';
-import { ChartDataSets, ChartOptions, ChartType, ChartLegendItem } from 'chart.js';
-import { Color, Label } from 'ng2-charts';
+import { ChartDataSets, ChartOptions, ChartType} from 'chart.js';
+import { Observable } from 'rxjs';
+import { Reading } from 'src/app/models/reading.model';
+import { ReadingService } from 'src/app/services/reading.service';
 
 @Component({
   selector: 'app-graph',
@@ -8,6 +11,8 @@ import { Color, Label } from 'ng2-charts';
   styleUrls: ['./graph.component.sass']
 })
 export class GraphComponent implements OnInit {
+  readings = [] as any
+  patients = [] as any
   // scatter
   public scatterChartOptions: ChartOptions = {
     responsive: true,
@@ -935,20 +940,20 @@ export class GraphComponent implements OnInit {
   ];
   public scatterChartType: ChartType = 'scatter';
 
-constructor() { }
+constructor(private readingService: ReadingService) { }
 
 ngOnInit() {
-  }
-  readings =[
-    {value: 1, viewValue: "Reading 1"},
-    {value: 2, viewValue: "Reading 2"},
-    {value: 3, viewValue: "Reading 3"}
-  ]
+  this.getPatients().subscribe(data => {
+    for(let  i = 0; i<data.length; i++){
+      this.patients[i] = { value: i, viewValue: data[i].patient_no! }
+    }
+  })
+}
 
-  patients = [
-    {value: 123, viewValue: 123},
-    {value: 234, viewValue: 234}
-  ]
+
+  patient_select = ""
+  reading_select = ""
+
   toggleSelect(e: any){
     var readingSelect = document.getElementById("reading-select-field")
     if(readingSelect?.style.display == "inline-block"){
@@ -956,10 +961,30 @@ ngOnInit() {
     }else{
       readingSelect!.style.display = "inline-block"
     }
+    this.getReadingsOfPatient(this.patients[this.patient_select].viewValue).subscribe(data => {
+      for(let i = 0; i<data.length;  i++){
+        this.readings[i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].comments}
+      }
+    }) 
   }
 
   toggleButton(e: any){
+    console.log(this)
     var runButton = document.getElementById("run-button")
     runButton!.style.display = "inline-block"
   }
+
+  getPatients(): Observable<Reading[]>{
+    return this.readingService.getAll()
+  }
+
+
+  getReadings(patient: string):  Observable<Reading[]>{
+    return this.readingService.getByString(patient)
+  }
+
+  getReadingsOfPatient(patient:  string): Observable<Reading[]>{
+    return this.readingService.getAllOfPatient(patient)
+  }
+
 }
