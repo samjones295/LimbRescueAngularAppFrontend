@@ -5,7 +5,7 @@
 
         <mat-form-field appearance="fill">
             <mat-label>Select Patient</mat-label>
-            <mat-select (selectionChange)="toggleSelect($event)">
+            <mat-select (selectionChange)="toggleSelect($event)" [(ngModel)]="patient_select" name="patient">
                 <mat-option *ngFor="let patient of patients" [value]="patient.value">
                    Patient: {{patient.viewValue}}
                 </mat-option>
@@ -14,7 +14,7 @@
 
         <mat-form-field id="reading-select-field" appearance="fill" style="display: none;">
             <mat-label>Select Readings</mat-label>
-            <mat-select (selectionChange)="toggleButton($event)">
+            <mat-select (selectionChange)="toggleButton($event)" [(ngModel)]="reading_select" name="reading">
                 <mat-option *ngFor="let reading of readings" [value]="reading.value">
                     {{reading.viewValue}}
                 </mat-option>

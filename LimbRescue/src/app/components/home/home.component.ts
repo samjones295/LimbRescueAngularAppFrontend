@@ -67,7 +67,7 @@ export class HomeComponent implements AfterViewInit {
 
 
   openUpdateReadingDialog(id: number) {
-    this.readingService.get(id).subscribe(
+    this.readingService.getById(id).subscribe(
       reading_data => {
         const dialogRef = this.dialog.open(UpdateReadingDialog, {
           data: reading_data,

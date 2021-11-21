@@ -16,8 +16,16 @@ export class ReadingService {
     return this.http.get<Reading[]>(baseUrl+'/readings');
   }
 
-  get(id: number): Observable<Reading>{
+  getAllOfPatient(patient_no: string): Observable<Reading[]> {
+    return this.http.get<Reading[]>(baseUrl+'/readings?patient_no='+patient_no);
+  }
+
+  getById(id: number): Observable<Reading>{
     return this.http.get<Reading>(baseUrl+'/reading/'+id)
+  }
+
+  getByString(patient_no: string): Observable<Reading[]>{
+    return this.http.get<Reading[]>(baseUrl+'/reading?patient_no='+patient_no)
   }
 
   put(reading: Reading, id: number){
