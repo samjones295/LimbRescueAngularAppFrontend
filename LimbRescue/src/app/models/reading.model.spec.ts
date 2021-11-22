@@ -1,7 +1,7 @@
-import { Reading } from './reading.model';
+import { ReadingData } from './reading-data.model';
 
-describe('Reading', () => {
+describe('ReadingData', () => {
   it('should create an instance', () => {
-    expect(new Reading()).toBeTruthy();
+    expect(new ReadingData()).toBeTruthy();
   });
 });
