@@ -28,13 +28,13 @@
             <!-- Train Accuracy Column -->
             <ng-container matColumnDef="train accuracy">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="data-field"> Train Accuracy </th>
-                <td mat-cell *matCellDef="let row" class="data-field"> {{row.train_accuracy} </td>
+                <td mat-cell *matCellDef="let row" class="data-field"> {{row.train_accuracy}} </td>
             </ng-container>
         
             <!-- Test Accuracy Column -->
             <ng-container matColumnDef="test accuracy">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="data-field"> Test Accuracy </th>
-                <td mat-cell *matCellDef="let row" class="data-field"> {{row.test_accuracy} </td>
+                <td mat-cell *matCellDef="let row" class="data-field"> {{row.test_accuracy}} </td>
             </ng-container>
         
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
