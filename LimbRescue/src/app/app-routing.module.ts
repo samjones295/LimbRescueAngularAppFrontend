@@ -7,6 +7,7 @@ import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
 import { MachineLearningComponent } from './components/machine-learning/machine-learning.component';
 import { ResultsComponent } from './components/results/results.component';
+import { GroupsComponent } from './components/groups/groups.component';
 
 
 const routes: Routes = [
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [LoggedInAuthGuard] },
   { path: 'machine-learning', component: MachineLearningComponent, canActivate: [AuthGuard] },
   { path: 'results', component: ResultsComponent, canActivate: [AuthGuard]},
+  { path: 'groups', component: GroupsComponent, canActivate: [AuthGuard]},
   { path: '**', redirectTo: 'home' }
 ];
 

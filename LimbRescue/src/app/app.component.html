@@ -14,6 +14,9 @@
       <li *ngIf="isLoggedIn$ | async as isLoggedIn" class="nav-item">
         <a routerLink="results" class="nav-link">Results</a>
       </li>
+      <li *ngIf="isLoggedIn$ | async as isLoggedIn" class="nav-item">
+        <a routerLink="groups" class="nav-link">Groups</a>
+      </li>      
     </div>
     <div>
       <ul class="navbar-nav navbar-collapse justify-content-end">
