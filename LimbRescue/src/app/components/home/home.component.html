@@ -1,4 +1,19 @@
 <div clas="mat-app-background">
+    <div class="mat-elevation-z8 table-style">
+        <mat-expansion-panel hideToggle>
+            <mat-expansion-panel-header>
+            <mat-panel-title>
+                Click here to start a reading
+            </mat-panel-title>
+            </mat-expansion-panel-header>
+            <p>Click the button to initiate a connection with the watch(es) and take a reading.</p>
+            <p>When the button is clicked it will wait for the watches to return the ready (connected) status and then start the reading</p>
+            <button mat-raised-button color="primary" id="run-button">Start Reading</button>
+        </mat-expansion-panel>
+    </div>
+
+
+
     <mat-form-field appearance="standard">
         <mat-label>Search</mat-label>
         <input matInput (keyup)="applyFilter($event)"  #input>
