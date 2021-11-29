@@ -36,7 +36,7 @@ export class HomeComponent implements AfterViewInit {
   readings!:  Reading[];
   currentReading: Reading = {};
 
-  displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
+  displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
   selection_subject = new SelectionModel<Reading>(true, []);
   //selection_lymphedema = new SelectionModel<Reading>(true, []);
