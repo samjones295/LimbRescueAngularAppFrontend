@@ -22,9 +22,10 @@
             <mat-error>Algorithm choice is required</mat-error>
         </mat-form-field> 
 
+        <div style="text-align: center;padding-bottom: 1%;">
+            <button mat-raised-button color="primary" id="run-button" (click)=runML() [disabled]="group_select == undefined || algo_select == undefined">Run</button>
+        </div>
     </form>
-    <div style="text-align: center;padding-bottom: 1%;width:30em;margin-left: 25em;">
-        <button mat-raised-button color="primary" id="run-button" (click)=runML() [disabled]="group_select == undefined || algo_select == undefined">Run</button>
-    </div>
+
 </div>
 
