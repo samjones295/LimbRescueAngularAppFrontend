@@ -20,6 +20,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MomentDateModule } from '@angular/material-moment-adapter';
 import { MAT_DATE_FORMATS } from '@angular/material/core';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -57,6 +58,7 @@ import { GroupsComponent } from './components/groups/groups.component';
     HttpClientModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatExpansionModule,
     MatOptionModule,
     MatInputModule,
     MatTableModule,
