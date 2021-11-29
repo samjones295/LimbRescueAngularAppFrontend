@@ -12,6 +12,7 @@ import { GroupService } from 'src/app/services/group.service'
 import { GroupReadingService } from 'src/app/services/group-reading.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { GroupReading } from 'src/app/models/group-reading.model';
+import { Router } from '@angular/router';
 
 
 export const MY_DATE_FORMATS = {
@@ -36,7 +37,7 @@ export class HomeComponent implements AfterViewInit {
   readings!:  Reading[];
   currentReading: Reading = {};
 
-  displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'comments'];
+  displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
   selection_subject = new SelectionModel<Reading>(true, []);
   //selection_lymphedema = new SelectionModel<Reading>(true, []);
@@ -45,7 +46,8 @@ export class HomeComponent implements AfterViewInit {
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
   @ViewChild(MatTable) matTable!: MatTable<Reading>;
 
-  constructor(private readingService: ReadingService, private groupService: GroupService, private groupReadingService: GroupReadingService, public dialog: MatDialog) {}
+
+  constructor(private router: Router, private readingService: ReadingService, private groupService: GroupService, private groupReadingService: GroupReadingService, public dialog: MatDialog) {}
 
   ngOnInit() {
     this.dataSource.paginator = this.paginator;
@@ -163,6 +165,10 @@ export class HomeComponent implements AfterViewInit {
         }
       )
     })
+  }
+
+  showGraph(id: number, lat: string){
+    this.router.navigate(['/graph'], { queryParams: {reading_id: id, laterality: lat}})
   }
 
   getAllReadings(){

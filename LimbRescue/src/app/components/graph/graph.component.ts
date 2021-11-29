@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Reading } from 'src/app/models/reading.model';
 import { ReadingService } from 'src/app/services/reading.service';
 import { ReadingDataService } from 'src/app/services/reading-data.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-graph',
@@ -19,6 +20,9 @@ export class GraphComponent implements OnInit {
   readings_data = [] as Reading[]
   patients_data = [] as string[]
   lateralites_data = [] as string[]
+
+  routed_id: number | undefined
+  routed_laterality: string | undefined
   // scatter
   public scatterChartOptions: ChartOptions = {
     responsive: true,
@@ -73,9 +77,22 @@ export class GraphComponent implements OnInit {
   ];
   public scatterChartType: ChartType = 'scatter';
 
-constructor(private readingService: ReadingService, private readingDataService: ReadingDataService) { }
+constructor(private route: ActivatedRoute, private readingService: ReadingService, private readingDataService: ReadingDataService) { }
 
 ngOnInit() {
+  this.route.queryParams.subscribe(params => {
+    this.routed_id = params.reading_id
+    this.routed_laterality = params.laterality
+  });
+  if(this.routed_id != undefined && this.routed_laterality != undefined){
+    let graph_data = [] as ChartPoint[]
+    this.getReadingData(this.routed_id, this.routed_laterality).subscribe(data => {
+      for(let i = 0; i<data.length; i++){
+        graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+      }
+      this.scatterChartData[0].data = graph_data
+    })
+  }
   this.getPatients().subscribe(data => {
     for(let  i = 0; i<data.length; i++){
       this.patients[i] = { value: i, viewValue: data[i].patient_no! }
@@ -111,6 +128,7 @@ ngOnInit() {
     }else{
       lateralitySelect!.style.display = "inline-block"
     }
+    this.routed_id = this.readings_data[this.reading_select].id
     this.getReadingsOfPatient(this.patients[this.patient_select].viewValue).subscribe(data => {
       for(let i = 0; i<data.length;  i++){
         this.lateralites[i] = { value: i, viewValue: data[i].laterality}
