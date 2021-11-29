@@ -4,21 +4,9 @@ import {MatPaginator} from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
+import { Result } from 'src/app/models/result.model';
+import { ResultService } from 'src/app/services/result.service';
 
-export interface ResultsData {
-  group_name: string;
-  date_ran: string;
-  algorithm_ran: string;
-}
-
-/** Constants used to fill up our data base. */
-const GROUPS: string[] = [
-  'Group 1', 'Group 2', 'Group 3', 'Group 4'
-];
-
-const ALGORITHMS: string[] = [
-  'Support Vector Machine', 'Random Forest', 'Naive Bayes', 'Multi Layer Perceptron'
-];
 
 @Component({
   selector: 'app-results',
@@ -27,16 +15,14 @@ const ALGORITHMS: string[] = [
 })
 export class ResultsComponent implements AfterViewInit {
 
-  displayedColumns: string[] = ['group name','date ran', 'algorithm ran', 'view report'];
-  dataSource: MatTableDataSource<ResultsData> = new MatTableDataSource();
-  selection = new SelectionModel<ResultsData>(true, []);
-  users = Array.from({length: 100}, (_, k) => createNewUser());
+  displayedColumns: string[] = ['group name','date ran', 'algorithm', 'train accuracy', 'test accuracy'];
+  dataSource: MatTableDataSource<Result> = new MatTableDataSource();
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
-  @ViewChild(MatTable) matTable!: MatTable<ResultsData>;
+  @ViewChild(MatTable) matTable!: MatTable<Result>;
 
-  constructor() {
+  constructor(private resultService: ResultService) {
 
   }
 
@@ -46,7 +32,14 @@ export class ResultsComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.dataSource.data = this.users;
+    this.resultService.getAll().subscribe(
+      data => {
+        this.dataSource.data = data
+      },
+      error => {
+        console.log(error);
+      }
+    )
     this.matTable.renderRows()
   }
 
@@ -59,15 +52,4 @@ export class ResultsComponent implements AfterViewInit {
     }
   }
 
-}
-
-function createNewUser(): ResultsData {
-  const group = GROUPS[Math.round(Math.random() * (GROUPS.length - 1))];
-  const algorithm = ALGORITHMS[Math.round(Math.random() * (GROUPS.length - 1))];
-
-  return {
-    group_name: group,
-    date_ran: Math.round(0.5+ Math.random() * 12).toString()+'/'+Math.round(0.5+ Math.random() * 31).toString()+'/'+Math.round(2012.5+ Math.random() * 9).toString(),
-    algorithm_ran: algorithm
-  };
 }
