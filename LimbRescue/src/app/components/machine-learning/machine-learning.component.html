@@ -4,33 +4,27 @@
 
         <mat-form-field appearance="fill">
             <mat-label>Select Group</mat-label>
-            <mat-select>
+            <mat-select [(ngModel)]="group_select" name="group" required>
                 <mat-option *ngFor="let group of groups" [value]="group.value">
-                    {{group.viewValue}}
+                   {{group.viewValue}}
                 </mat-option>
             </mat-select>
+            <mat-error>Group choice is required</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="fill">
             <mat-label>Select Algorithm</mat-label>
-            <mat-select>
+            <mat-select [(ngModel)]="algo_select" name="group" required>
                 <mat-option *ngFor="let algo of algos" [value]="algo.value">
                     {{algo.viewValue}}
                 </mat-option>
             </mat-select>
+            <mat-error>Algorithm choice is required</mat-error>
         </mat-form-field> 
 
-        <mat-form-field appearance="fill">
-            <mat-label>Select Data Type</mat-label>
-            <mat-select>
-                <mat-option *ngFor="let dt of dataManipulation" [value]="dt.value">
-                    {{dt.viewValue}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
     </form>
     <div style="text-align: center;padding-bottom: 1%;width:30em;margin-left: 25em;">
-        <button mat-raised-button color="primary" id="run-button">Run</button>
+        <button mat-raised-button color="primary" id="run-button" (click)=runML() [disabled]="group_select == undefined || algo_select == undefined">Run</button>
     </div>
 </div>
 

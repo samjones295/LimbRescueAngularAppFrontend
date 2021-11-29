@@ -5,6 +5,7 @@ import { MatTable } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { GroupService } from 'src/app/services/group.service';
 
 @Component({
   selector: 'app-machine-learning',
@@ -12,26 +13,45 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog
   styleUrls: ['./machine-learning.component.sass']
 })
 export class MachineLearningComponent implements OnInit {
+  groups = [] as any
+  groups_data = [] as any
+  group_select: number | undefined
+  algo_select: number | undefined
 
-  constructor() {}
+  constructor(private groupService: GroupService) {}
   ngOnInit(): void {
   }
 
-  groups =[
-    {value: 1, viewValue: "Group 1"},
-    {value: 2, viewValue: "Group 2"},
-    {value: 3, viewValue: "Group 3"},
-    {value: 4, viewValue: "Group 4"}
-  ]
+  ngAfterViewInit() {
+    this.groupService.getAll().subscribe(
+      data => {
+        this.groups_data = data
+        for(let  i = 0; i<data.length; i++){
+          this.groups[i] = { value: i, viewValue: data[i].name! }
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+
+  }
+
   algos = [
-    {value: 1, viewValue: "Support Vector Machine"},
-    {value: 2, viewValue: "Random Forest"},
-    {value: 3, viewValue: "Naive Bayes"},
-    {value: 4, viewValue: "Multi Layer Perceptron"}
+    {value: 0, viewValue: "Support Vector Machine"},
+    {value: 1, viewValue: "Random Forest"},
+    {value: 2, viewValue: "Naive Bayes"},
+    {value: 3, viewValue: "Multi Layer Perceptron"}
   ]
-  dataManipulation = [
-    {value: "D", viewValue: "Derived"},
-    {value: "R", viewValue: "Raw"},
-  ]
+
+  runML(){
+    if(this.group_select != undefined){
+      console.log(this.groups_data[this.group_select])
+    }
+    if(this.algo_select != undefined){
+      console.log(this.algos[this.algo_select].viewValue)
+    }
+    
+  }
 
 }
