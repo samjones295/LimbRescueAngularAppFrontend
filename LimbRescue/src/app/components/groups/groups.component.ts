@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { Group } from 'src/app/models/group.model';
 import { GroupService } from 'src/app/services/group.service'
@@ -35,6 +35,11 @@ export class GroupsComponent implements OnInit {
       }
     )
     this.matTable.renderRows()
+
+    const sortState: Sort = {active: 'id', direction: 'desc'};
+    this.sort.active = sortState.active;
+    this.sort.direction = sortState.direction;
+    this.sort.sortChange.emit(sortState);
   }
 
   getAllGroupss(){

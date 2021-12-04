@@ -6,6 +6,12 @@
     
     <div class="mat-elevation-z8 table-style">
         <table mat-table [dataSource]="dataSource" matSort>
+
+            <!-- ID Column -->
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="data-field"> ID</th>
+                <td mat-cell *matCellDef="let row" class="data-field"> {{row.id}} </td>
+            </ng-container>            
             
             <!-- Group Column -->
             <ng-container matColumnDef="group name">

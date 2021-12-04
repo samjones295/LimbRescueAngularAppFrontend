@@ -2,7 +2,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import {AfterViewInit, Component, ViewChild, Inject} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { Reading } from 'src/app/models/reading.model';
@@ -64,6 +64,11 @@ export class HomeComponent implements AfterViewInit {
       }
     )
     this.matTable.renderRows()
+
+    const sortState: Sort = {active: 'id', direction: 'desc'};
+    this.sort.active = sortState.active;
+    this.sort.direction = sortState.direction;
+    this.sort.sortChange.emit(sortState);
   }
 
 
