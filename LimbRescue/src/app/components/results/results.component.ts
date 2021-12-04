@@ -2,7 +2,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import {AfterViewInit, Component, ViewChild, OnInit} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import { Result } from 'src/app/models/result.model';
 import { ResultService } from 'src/app/services/result.service';
@@ -15,7 +15,7 @@ import { ResultService } from 'src/app/services/result.service';
 })
 export class ResultsComponent implements AfterViewInit {
 
-  displayedColumns: string[] = ['group name','date ran', 'algorithm', 'train accuracy', 'test accuracy'];
+  displayedColumns: string[] = ['id', 'group name','date ran', 'algorithm', 'train accuracy', 'test accuracy'];
   dataSource: MatTableDataSource<Result> = new MatTableDataSource();
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
@@ -41,6 +41,11 @@ export class ResultsComponent implements AfterViewInit {
       }
     )
     this.matTable.renderRows()
+
+    const sortState: Sort = {active: 'id', direction: 'desc'};
+    this.sort.active = sortState.active;
+    this.sort.direction = sortState.direction;
+    this.sort.sortChange.emit(sortState);
   }
 
   applyFilter(event: Event) {

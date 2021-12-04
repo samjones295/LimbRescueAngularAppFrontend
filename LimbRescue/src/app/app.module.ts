@@ -16,6 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MomentDateModule } from '@angular/material-moment-adapter';
@@ -69,6 +70,7 @@ import { GroupsComponent } from './components/groups/groups.component';
     MatCheckboxModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatProgressSpinnerModule,
     MomentDateModule, 
     ChartsModule
   ],
