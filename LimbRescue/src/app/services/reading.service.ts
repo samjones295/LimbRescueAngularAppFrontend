@@ -35,4 +35,8 @@ export class ReadingService {
                   comments: reading.comments}
     this.http.put(baseUrl+'/reading/'+id, body, {observe: 'response'}).subscribe()
   }
+
+  getDateAndtime(delta: number): Observable<String>{
+    return this.http.get<String>(baseUrl+'/start?delta='+delta)
+  }
 }
