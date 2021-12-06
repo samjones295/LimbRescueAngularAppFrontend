@@ -36,6 +36,7 @@ export class HomeComponent implements AfterViewInit {
 
   readings!:  Reading[];
   currentReading: Reading = {};
+  reading_duration: any;
 
   displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
@@ -71,7 +72,8 @@ export class HomeComponent implements AfterViewInit {
     this.matTable.renderRows()
   }
 
-
+  startReading(){
+    this.readingService.getDateAndtime(parseInt(this.reading_duration)*1000).subscribe(time => {})}
 
   openUpdateReadingDialog(id: number) {
     this.readingService.getById(id).subscribe(
