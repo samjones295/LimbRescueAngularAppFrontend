@@ -2,17 +2,24 @@
     <div class="mat-elevation-z8 table-style">
         <mat-expansion-panel hideToggle>
             <mat-expansion-panel-header>
-            <mat-panel-title>
+            <mat-panel-title *ngIf="!show_spinner">
                 Click here to start a reading
             </mat-panel-title>
+            <mat-panel-title *ngIf="show_spinner">
+                Reading in progress
+            </mat-panel-title>
             </mat-expansion-panel-header>
-            <p>Click the button to initiate a connection with the watch(es) and take a reading.</p>
-            <p>When the button is clicked it will wait for the watches to return the ready (connected) status and then start the reading</p>
-            <mat-form-field>
-                <input matInput type="number" placeholder="Reading Duration" [(ngModel)]="reading_duration" required >
+            <p *ngIf="!show_spinner">Click the button to initiate a connection with the watch(es) and take a reading.</p>
+            <p *ngIf="!show_spinner">When the button is clicked it will wait for the watches to return the ready (connected) status and then start the reading.</p>
+            <p *ngIf="!show_spinner">We will add 3 seconds to your wait time to allow for the watches to connect, your reading will still be the correct length.</p>
+            <mat-form-field *ngIf="!show_spinner">
+                <input matInput type="number" *ngIf="!show_spinner" placeholder="Reading Duration" [(ngModel)]="reading_duration" required >
             </mat-form-field>
-            <mat-action-row>
-                <button mat-raised-button color="primary" id="run-button" (click)=startReading() readonly="true" [disabled]="reading_duration == undefined">Start Reading</button>
+            <mat-progress-spinner style="left: 45%;" *ngIf="show_spinner" [value]=value></mat-progress-spinner>
+            <p *ngIf="show_spinner" style="position: relative; left: 43%;">Time Remaining: {{time_left}} seconds</p>
+            <p *ngIf="show_spinner" style="position: relative; left: 41%;">Please wait for your reading to finish.</p>
+            <mat-action-row *ngIf="!show_spinner">
+                <button mat-raised-button *ngIf="!show_spinner" color="primary" id="run-button" (click)=startReading() readonly="true" [disabled]="reading_duration == undefined">Start Reading</button>
             </mat-action-row>
         </mat-expansion-panel>
     </div>

@@ -13,6 +13,7 @@ import { GroupReadingService } from 'src/app/services/group-reading.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { GroupReading } from 'src/app/models/group-reading.model';
 import { Router } from '@angular/router';
+import { timer } from 'rxjs';
 
 
 export const MY_DATE_FORMATS = {
@@ -35,7 +36,11 @@ export const MY_DATE_FORMATS = {
 export class HomeComponent implements AfterViewInit {
   readings!:  Reading[];
   currentReading: Reading = {};
-  reading_duration: any;
+  reading_duration = 30;
+  show_spinner = false;
+  time_left!: number;
+  time_passed!: number;
+  value!: number;
 
   readings_sub: any;
   reading_by_id_sub: any;
@@ -46,6 +51,7 @@ export class HomeComponent implements AfterViewInit {
   update_dialog_ref_sub: any;
   create_dialog_ref_sub: any;
   post_sub: any;
+  timer_sub: any;
 
   displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
@@ -169,7 +175,20 @@ export class HomeComponent implements AfterViewInit {
   }
 
   startReading(){
-    this.date_and_time_sub =this.readingService.getDateAndtime(parseInt(this.reading_duration)*1000).subscribe(time => {})
+    this.date_and_time_sub = this.readingService.getDateAndtime(parseInt(String(this.reading_duration))*1000).subscribe(time => {console.log(time)})
+    let timer_var = timer(0, 1000)
+    let timer_length = parseInt(String(this.reading_duration))+3
+    this.show_spinner = true
+    this.timer_sub = timer_var.subscribe(val => {
+      this.time_passed = val
+      this.time_left = timer_length-val
+      this.value = parseInt(String((this.time_passed/this.reading_duration)*100), 10)
+      console.log(this.value)
+      if(this.time_left == 0){
+        this.timer_sub.unsubscribe()
+        this.show_spinner = false
+      }
+    })
   }
 
   showGraph(id: number, lat: string){
