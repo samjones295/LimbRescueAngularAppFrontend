@@ -87,8 +87,12 @@ export class HomeComponent implements AfterViewInit {
         dialogRef.afterClosed().subscribe(
           output_data => {
             if(output_data != undefined){
-              this.readingService.put(output_data, id)
-              window.location.reload()
+              this.readingService.put(output_data, id).subscribe(response => {
+              this.readingService.getAll().subscribe(data => {
+                this.dataSource.data = data
+                this.matTable.renderRows()
+              })
+              })
             }
           }
         )

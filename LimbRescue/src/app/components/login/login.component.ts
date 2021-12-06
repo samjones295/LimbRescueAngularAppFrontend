@@ -15,6 +15,7 @@ export class LoginComponent implements OnInit {
   successMessage?: string;
   invalidLogin = false;
   loginSuccess = false;
+  login_subscription: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -24,8 +25,12 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
   }
 
+  ngOnDestroy(){
+    this.login_subscription.unsubscribe()
+  }
+
   handleLogin() {
-    this.authenticationService.authenticationService(this.username!, this.password!).subscribe((result)=> {
+    this.login_subscription = this.authenticationService.authenticationService(this.username!, this.password!).subscribe((result)=> {
       this.invalidLogin = false;
       this.loginSuccess = true;
       this.successMessage = 'Login Successful.';
