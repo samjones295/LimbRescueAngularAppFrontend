@@ -1,8 +1,6 @@
 <div class="container col-lg-11">
     <h2 style="text-align: center;"> Select Graph</h2>
     <form name="mlForm" style="text-align: center;padding-top: 2%;">
-
-
         <mat-form-field appearance="fill">
             <mat-label>Select Patient</mat-label>
             <mat-select (selectionChange)="toggleSelectReading($event)" [(ngModel)]="patient_select" name="patient">
@@ -11,7 +9,6 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-
         <mat-form-field id="reading-select-field" appearance="fill" style="display: none;">
             <mat-label>Select Readings</mat-label>
             <mat-select (selectionChange)="toggleSelectLaterality($event)" [(ngModel)]="reading_select" name="reading">
@@ -20,7 +17,6 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-
         <mat-form-field id="laterality-select-field" appearance="fill" style="display: none;">
             <mat-label>Select Laterality</mat-label>
             <mat-select (selectionChange)="toggleButton($event)" [(ngModel)]="laterality_select" name="laterality">

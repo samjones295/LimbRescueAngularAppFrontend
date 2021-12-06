@@ -16,16 +16,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MomentDateModule } from '@angular/material-moment-adapter';
 import { MAT_DATE_FORMATS } from '@angular/material/core';
-import {MatExpansionModule} from '@angular/material/expansion';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HomeComponent, UpdateReadingDialog, CreateGroupFromReadingsDialog, MY_DATE_FORMATS, AddReadingsToExistingGroupDialog } from './components/home/home.component';
+import { HomeComponent, UpdateReadingDialog, CreateGroupFromReadingsDialog, MY_DATE_FORMATS } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuthGuardService } from './components/login/auth-guard.service';
@@ -42,7 +42,6 @@ import { GroupsComponent } from './components/groups/groups.component';
     HomeComponent,
     UpdateReadingDialog,
     CreateGroupFromReadingsDialog,
-    AddReadingsToExistingGroupDialog,
     GraphComponent,
     LoginComponent,
     MachineLearningComponent,

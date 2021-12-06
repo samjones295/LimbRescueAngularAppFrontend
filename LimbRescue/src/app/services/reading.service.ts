@@ -33,7 +33,7 @@ export class ReadingService {
                   date_created: reading.date_created,
                   laterality: reading.laterality,
                   comments: reading.comments}
-    this.http.put(baseUrl+'/reading/'+id, body, {observe: 'response'}).subscribe()
+    return this.http.put(baseUrl+'/reading/'+id, body, {observe: 'response'})
   }
 
   getDateAndtime(delta: number): Observable<String>{

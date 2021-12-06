@@ -1,10 +1,10 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import {AfterViewInit, Component, ViewChild, Inject} from '@angular/core';
-import {MatPaginator} from '@angular/material/paginator';
+import { AfterViewInit, Component, ViewChild, Inject } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
-import {MatSort, Sort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
-import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { MatSort, Sort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
 import { Reading } from 'src/app/models/reading.model';
 import { Group } from 'src/app/models/group.model'
 import { ReadingService } from 'src/app/services/reading.service';
@@ -33,15 +33,23 @@ export const MY_DATE_FORMATS = {
   styleUrls: ['./home.component.sass']
 })
 export class HomeComponent implements AfterViewInit {
-
   readings!:  Reading[];
   currentReading: Reading = {};
   reading_duration: any;
 
+  readings_sub: any;
+  reading_by_id_sub: any;
+  group_by_name_sub: any;
+  group_create_sub: any;
+  reading_update_sub: any;
+  date_and_time_sub: any;
+  update_dialog_ref_sub: any;
+  create_dialog_ref_sub: any;
+  post_sub: any;
+
   displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
   selection_subject = new SelectionModel<Reading>(true, []);
-  //selection_lymphedema = new SelectionModel<Reading>(true, []);
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
@@ -61,7 +69,7 @@ export class HomeComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.readingService.getAll().subscribe(
+    this.readings_sub = this.readingService.getAll().subscribe(
       data => {
         this.dataSource.data = data
       },
@@ -72,11 +80,38 @@ export class HomeComponent implements AfterViewInit {
     this.matTable.renderRows()
   }
 
-  startReading(){
-    this.readingService.getDateAndtime(parseInt(this.reading_duration)*1000).subscribe(time => {})}
+  ngOnDestroy() {
+    if(this.readings_sub != undefined){
+      this.readings_sub.unsubscribe()
+    }
+    if(this.reading_by_id_sub != undefined){
+      this.reading_by_id_sub.unsubscribe()
+    }
+    if(this.group_by_name_sub != undefined){
+      this.group_by_name_sub.unsubscribe()
+    }
+    if(this.group_create_sub != undefined){
+      this.group_create_sub.unsubscribe()
+    }
+    if(this.reading_update_sub != undefined){
+      this.reading_update_sub.unsubscribe()
+    }
+    if(this.date_and_time_sub != undefined){
+      this.date_and_time_sub.unsubscribe()
+    }
+    if(this.update_dialog_ref_sub != undefined){
+      this.update_dialog_ref_sub.unsubscribe()
+    }
+    if(this.create_dialog_ref_sub != undefined){
+      this.create_dialog_ref_sub.unsubscribe()
+    }
+    if(this.post_sub != undefined){
+      this.post_sub.unsubscribe()
+    }
+  }
 
   openUpdateReadingDialog(id: number) {
-    this.readingService.getById(id).subscribe(
+    this.reading_by_id_sub = this.readingService.getById(id).subscribe(
       reading_data => {
         const dialogRef = this.dialog.open(UpdateReadingDialog, {
           data: reading_data,
@@ -84,11 +119,15 @@ export class HomeComponent implements AfterViewInit {
           autoFocus: true,
           width: '400px',
         });
-        dialogRef.afterClosed().subscribe(
+        this.update_dialog_ref_sub = dialogRef.afterClosed().subscribe(
           output_data => {
             if(output_data != undefined){
-              this.readingService.put(output_data, id)
-              window.location.reload()
+              this.reading_update_sub = this.readingService.put(output_data, id).subscribe(response => {
+              this.readings_sub = this.readingService.getAll().subscribe(data => {
+                this.dataSource.data = data
+                this.matTable.renderRows()
+              })
+              })
             }
           }
         )
@@ -108,20 +147,19 @@ export class HomeComponent implements AfterViewInit {
       autoFocus: true,
       width: '500px',
     });
-    dialogRef.afterClosed().subscribe(
+    this.create_dialog_ref_sub = dialogRef.afterClosed().subscribe(
       output_data => {
         if(output_data != undefined){
           output_data.id = 0
-          let response = this.groupService.post(output_data)
-          response.subscribe(data => {
-            this.groupService.get_by_name(output_data.name).subscribe(result => {
+          this.post_sub = this.groupService.post(output_data).subscribe(data => {
+            this.group_by_name_sub = this.groupService.get_by_name(output_data.name).subscribe(result => {
               let reading_id_arr = result.reading_ids!.split(",").map(Number)
               let groupReading = new GroupReading()
               groupReading.id = 0
               groupReading.group_id = result.id
               for(let num of reading_id_arr){
                 groupReading.reading_id = num
-                this.groupReadingService.post(groupReading).subscribe(data => {})
+                this.group_create_sub = this.groupReadingService.post(groupReading).subscribe(data => {})
               }
             })
           })
@@ -130,70 +168,15 @@ export class HomeComponent implements AfterViewInit {
     )
   }
 
-  openAddReadingsToExistingGroupDialog() {
-    let selected_subjects = this.getSelectedSubjects()
-    let subject_ids = this.getSelectionArrayIds(selected_subjects)
-
-    let group = new Group()
-    group.reading_ids = subject_ids
-    this.groupService.getAll().subscribe(groups_array => {
-      let groups = groups_array
-      const dialogRef = this.dialog.open(AddReadingsToExistingGroupDialog, {
-        data: {group, groups},
-        disableClose: true,
-        autoFocus: true,
-        width: '500px',
-      });
-      dialogRef.afterClosed().subscribe(
-        output_data => {
-          if(output_data != undefined){
-            this.groupService.get_by_name(output_data.name).subscribe(data => {
-              let current_ids = data.reading_ids!.split(",").map(Number).sort()
-              let new_ids =  output_data.reading_ids.split(",").map(Number).sort()
-              let combined_ids = current_ids.concat(new_ids.filter((item: any) => current_ids.indexOf(item) < 0))
-              let new_group = new Group()
-
-              new_group.id = data.id
-              new_group.name = data.name
-              new_group.reading_ids = combined_ids.toString()
-
-              this.groupService.put(new_group, data.id!).subscribe(result => {
-                let groupReading = new GroupReading()
-                groupReading.id = 0
-                groupReading.group_id = data.id
-                for(let num of combined_ids){
-                  groupReading.reading_id = num
-                  this.groupReadingService.post(groupReading).subscribe(data => {})
-                }
-              })
-              
-            })
-          }
-        }
-      )
-    })
+  startReading(){
+    this.date_and_time_sub =this.readingService.getDateAndtime(parseInt(this.reading_duration)*1000).subscribe(time => {})
   }
 
   showGraph(id: number, lat: string){
     this.router.navigate(['/graph'], { queryParams: {reading_id: id, laterality: lat}})
   }
 
-  getAllReadings(){
-    this.readingService.getAll().subscribe(
-      data => {
-        console.log(data)
-        return data
-      },
-      error => {
-        console.log(error);
-      }
-    )
-  }
-
-
-
   // Table filtering and selectiing below
-
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -203,67 +186,41 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
-    /** Whether the number of selected elements matches the total number of rows. */
-    isAllSelectedSubject() {
-      const numSelected = this.selection_subject.selected.length;
-      const numRows = this.dataSource.data.length;
-      return numSelected === numRows;
-    }
+  /** Whether the number of selected elements matches the total number of rows. */
+  isAllSelectedSubject() {
+    const numSelected = this.selection_subject.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
   
-    /** Selects all rows if they are not all selected; otherwise clear selection. */
-    masterToggleSubject() {
-      if (this.isAllSelectedSubject()) {
-        this.selection_subject.clear();
-        return;
-      }
+  /** Selects all rows if they are not all selected; otherwise clear selection. */
+  masterToggleSubject() {
+    if (this.isAllSelectedSubject()) {
+      this.selection_subject.clear();
+      return;
+    }
+
+    this.selection_subject.select(...this.dataSource.data);
+  }
+
+  /** The label for the checkbox on the passed row */
+  checkboxLabelSubject(row?: Reading): string {
+    if (!row) {
+      return `${this.isAllSelectedSubject() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection_subject.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
+  }
+
+  getSelectedSubjects() {
+    return this.selection_subject.selected
+  }
   
-      this.selection_subject.select(...this.dataSource.data);
-    }
-
-    /** The label for the checkbox on the passed row */
-    checkboxLabelSubject(row?: Reading): string {
-      if (!row) {
-        return `${this.isAllSelectedSubject() ? 'deselect' : 'select'} all`;
-      }
-      return `${this.selection_subject.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
-    }
-
-    getSelectedSubjects() {
-      return this.selection_subject.selected
-    }
-    
-    getSelectionArrayIds(arr: Array<Reading>){
-      let reading_ids = ''
-      arr.forEach(item => reading_ids+=item.id+',')
-      reading_ids = reading_ids.substring(0,reading_ids.length - 1)
-      return reading_ids
-    }
-
-    // /** Whether the number of selected elements matches the total number of rows. */
-    // isAllSelectedLymphedema() {
-    //   const numSelected = this.selection_lymphedema.selected.length;
-    //   const numRows = this.dataSource.data.length;
-    //   return numSelected === numRows;
-    //   }
-
-    // /** Selects all rows if they are not all selected; otherwise clear selection. */
-    // masterToggleLymphedema() {
-    //   if (this.isAllSelectedLymphedema()) {
-    //     this.selection_lymphedema.clear();
-    //     return;
-    //   }
-  
-    //   this.selection_lymphedema.select(...this.dataSource.data);
-    // }
-  
-    // /** The label for the checkbox on the passed row */
-    // checkboxLabelLymphedema(row?: Reading): string {
-    //   if (!row) {
-    //     return `${this.isAllSelectedLymphedema() ? 'deselect' : 'select'} all`;
-    //   }
-    //   return `${this.selection_lymphedema.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
-    // }
-
+  getSelectionArrayIds(arr: Array<Reading>){
+    let reading_ids = ''
+    arr.forEach(item => reading_ids+=item.id+',')
+    reading_ids = reading_ids.substring(0,reading_ids.length - 1)
+    return reading_ids
+  }
 }
 
 
@@ -348,45 +305,5 @@ export class CreateGroupFromReadingsDialog {
   close() {
     this.dialogRef.close();
   }
-}
 
-///////////////////////////////////////////////////
-////   Add Readings to Existing Group Dialog   ////
-///////////////////////////////////////////////////
-@Component({
-  selector: 'add-readings-to-existing-group-dialog',
-  templateUrl: 'add-readings-to-existing-group-dialog.html',
-  styleUrls: ['./home.component.sass'],
-})
-export class AddReadingsToExistingGroupDialog {
-  id: number | undefined
-  name: string | undefined
-  reading_ids: string | undefined
-  groups: Group[]
-
-  form!: FormGroup
-
-  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<CreateGroupFromReadingsDialog>, @Inject(MAT_DIALOG_DATA) public data : any) {
-    this.id = data.group.id
-    this.name = data.group.name
-    this.reading_ids = data.group.reading_ids
-    this.groups = data.groups
-  }
-
-  ngOnInit() {
-    this.form = this.fb.group({
-        id: [this.id, []],
-        name: [this.name, []],
-        reading_ids: [this.reading_ids, []],
-        groups: [this.groups, []]
-    });
-  }
-
-  save() {
-    this.dialogRef.close(this.form.value);
-  }
-
-  close() {
-    this.dialogRef.close();
-  }
 }

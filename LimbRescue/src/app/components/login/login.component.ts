@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthenticationService } from './auth.service';
 
 @Component({
@@ -15,17 +15,23 @@ export class LoginComponent implements OnInit {
   successMessage?: string;
   invalidLogin = false;
   loginSuccess = false;
+  login_subscription: any;
 
   constructor(
-    private route: ActivatedRoute,
     private router: Router,
     private authenticationService: AuthenticationService) {   }
 
   ngOnInit() {
   }
 
+  ngOnDestroy(){
+    if(this.login_subscription != undefined){
+      this.login_subscription.unsubscribe()
+    }
+  }
+
   handleLogin() {
-    this.authenticationService.authenticationService(this.username!, this.password!).subscribe((result)=> {
+    this.login_subscription = this.authenticationService.authenticationService(this.username!, this.password!).subscribe((result)=> {
       this.invalidLogin = false;
       this.loginSuccess = true;
       this.successMessage = 'Login Successful.';
