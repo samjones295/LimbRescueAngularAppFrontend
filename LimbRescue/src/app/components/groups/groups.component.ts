@@ -23,6 +23,11 @@ export class GroupsComponent implements OnInit {
   ngOnInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+
+    const sortState: Sort = {active: 'id', direction: 'desc'};
+    this.sort.active = sortState.active;
+    this.sort.direction = sortState.direction;
+    this.sort.sortChange.emit(sortState);
   }
 
   ngAfterViewInit() {
@@ -35,11 +40,6 @@ export class GroupsComponent implements OnInit {
       }
     )
     this.matTable.renderRows()
-
-    const sortState: Sort = {active: 'id', direction: 'desc'};
-    this.sort.active = sortState.active;
-    this.sort.direction = sortState.direction;
-    this.sort.sortChange.emit(sortState);
   }
 
   getAllGroupss(){
