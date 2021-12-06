@@ -22,9 +22,7 @@ export class AuthenticationService {
     this.loggedIn.next(value)
   }
 
-  constructor(private http: HttpClient) {
-
-  }
+  constructor(private http: HttpClient) {}
 
   authenticationService(username: string, password: string) {
     let authToken = this.createBasicAuthToken(username, password)

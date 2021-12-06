@@ -14,6 +14,8 @@ export class GroupsComponent implements OnInit {
   displayedColumns: string[] = ['id' ,'name', 'reading_ids'];
   dataSource: MatTableDataSource<Group> = new MatTableDataSource();
 
+  groups_sub: any;
+
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
   @ViewChild(MatTable) matTable!: MatTable<Group>;
@@ -30,8 +32,14 @@ export class GroupsComponent implements OnInit {
     this.sort.sortChange.emit(sortState);
   }
 
+  ngOnDestroy(){
+    if(this.groups_sub != undefined){
+      this.groups_sub.unsubscribe()
+    }
+  }
+
   ngAfterViewInit() {
-    this.groupService.getAll().subscribe(
+    this.groups_sub = this.groupService.getAll().subscribe(
       data => {
         this.dataSource.data = data
       },
@@ -41,22 +49,6 @@ export class GroupsComponent implements OnInit {
     )
     this.matTable.renderRows()
   }
-
-  getAllGroupss(){
-    this.groupService.getAll().subscribe(
-      data => {
-        console.log(data)
-        return data
-      },
-      error => {
-        console.log(error);
-      }
-    )
-  }
-
-
-
-  // Table filtering and selectiing below
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
