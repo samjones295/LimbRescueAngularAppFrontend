@@ -21,16 +21,19 @@ export class GroupReadingService {
   }
 
   put(group: GroupReading, id: number){
-    const body = {group_id: group.group_id,
+    const body = {id: id,
+                  group_id: group.group_id,
                   reading_id: group.reading_id
                 }
-    this.http.put(baseUrl+'/group/'+id, body, {observe: 'response'})
+    this.http.put(baseUrl+'/groupreading/'+id, body, {observe: 'response'})
   }
 
   post(group: GroupReading){
-    const body = {group_id: group.group_id,
-      reading_id: group.reading_id
-    }
+    console.log(group)
+    const body = {id: group.id,
+                  group_id: group.group_id,
+                  reading_id: group.reading_id
+                  }
     return this.http.post(baseUrl+'/groupreading', body, {observe: 'response'})
   }
 }

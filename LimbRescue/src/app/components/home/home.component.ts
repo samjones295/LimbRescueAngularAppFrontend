@@ -156,12 +156,13 @@ export class HomeComponent implements AfterViewInit {
     this.create_dialog_ref_sub = dialogRef.afterClosed().subscribe(
       output_data => {
         if(output_data != undefined){
-          output_data.id = 0
+          output_data.id = 1
           this.post_sub = this.groupService.post(output_data).subscribe(data => {
+            console.log(data)
             this.group_by_name_sub = this.groupService.get_by_name(output_data.name).subscribe(result => {
               let reading_id_arr = result.reading_ids!.split(",").map(Number)
               let groupReading = new GroupReading()
-              groupReading.id = 0
+              groupReading.id = 1
               groupReading.group_id = result.id
               for(let num of reading_id_arr){
                 groupReading.reading_id = num
@@ -170,6 +171,7 @@ export class HomeComponent implements AfterViewInit {
             })
           })
         }
+        this.selection_subject.clear()
       }
     )
   }
@@ -182,7 +184,7 @@ export class HomeComponent implements AfterViewInit {
     this.timer_sub = timer_var.subscribe(val => {
       this.time_passed = val
       this.time_left = timer_length-val
-      this.value = parseInt(String((this.time_passed/this.reading_duration)*100), 10)
+      this.value = parseInt(String((this.time_passed/(timer_length-1))*100), 10)
       console.log(this.value)
       if(this.time_left == 0){
         this.timer_sub.unsubscribe()
