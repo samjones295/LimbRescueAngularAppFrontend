@@ -9,20 +9,6 @@
         </li>
         <li>
             <mat-form-field appearance="fill">
-                <mat-label>Choose a date</mat-label>
-                <input matInput formControlName="date_created" [matDatepicker]="picker" value="{{data.date_created}}">
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
-        </li>
-        <li>
-            <mat-form-field appearance="fill">
-                <mat-label>Laterality</mat-label>
-                <input matInput formControlName="laterality" value="{{data.laterality}}"/>
-            </mat-form-field>
-        </li>
-        <li>
-            <mat-form-field appearance="fill">
                 <mat-label>Comments</mat-label>
                 <textarea matInput formControlName="comments">{{data.comments}}</textarea>
             </mat-form-field>

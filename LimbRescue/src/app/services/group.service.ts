@@ -21,18 +21,20 @@ export class GroupService {
   }
 
   get_by_name(name: string): Observable<Group>{
-    return this.http.get<Group>(baseUrl+'/group/'+name)
+    return this.http.get<Group>(baseUrl+'/group?name='+name)
   }
 
   put(group: Group, id: number){
-    const body = {name: group.name,
+    const body = {id: id,
+                  name: group.name,
                   reading_ids: group.reading_ids
                 }
     return this.http.put(baseUrl+'/group/'+id, body, {observe: 'response'})
   }
 
   post(group: Group){
-    const body = {name: group.name,
+    const body = {id: group.id,
+      name: group.name,
       reading_ids: group.reading_ids
     }
     return this.http.post(baseUrl+'/group', body, {observe: 'response'})

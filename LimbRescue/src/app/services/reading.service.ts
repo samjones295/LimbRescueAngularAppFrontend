@@ -29,7 +29,8 @@ export class ReadingService {
   }
 
   put(reading: Reading, id: number){
-    const body = {patient_no: reading.patient_no,
+    const body = {id: id,
+                  patient_no: reading.patient_no,
                   date_created: reading.date_created,
                   laterality: reading.laterality,
                   comments: reading.comments}
