@@ -12,27 +12,34 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./graph.component.sass']
 })
 export class GraphComponent implements OnInit {
+  // Define variables to hold data in the format for the select elements
   readings = [] as any
   patients = [] as any
   lateralites = [] as any
 
+  // Define a variable to hold the actual data received
   readings_data = [] as Reading[]
   patients_data = [] as string[]
   lateralites_data = [] as string[]
 
+  // Define variables to hold the index of the selection from the dropdown
   patient_select!: number | undefined
   reading_select!: number | undefined
   laterality_select!: number | undefined
 
+  // Define variables for subscriptions
   query_params_sub: any;
   reading_data_sub: any;
   reading_data_sub_bilateral: any;
   patients_sub: any;
   readings_of_patient_sub: any;
 
+  // Define variables to hold info given from clicking the graph button on the home page
   routed_id: number | undefined
   routed_laterality: string | undefined
 
+  // All of the options for a the chart on the graph page.
+  // Please check chart.js documentation for more information
   public scatterChartOptions: ChartOptions = {
     responsive: true,
     legend: {
@@ -74,6 +81,8 @@ export class GraphComponent implements OnInit {
     }
   };
 
+  // Options for the data for the chart
+  // Please check chart.js documentation for more information
   public scatterChartData: ChartDataSets[] = [
     {
       data: [],
@@ -92,46 +101,87 @@ export class GraphComponent implements OnInit {
       fill: false
     },
   ];
+
+  // Chart type to display on graph 
+  // Please check chart.js documentation for more information
   public scatterChartType: ChartType = 'scatter';
 
+  // Route is to get parameters from coming from a different page
+  // The two services are used to get http requests from the backend
   constructor(private route: ActivatedRoute, private readingService: ReadingService, private readingDataService: ReadingDataService) { }
 
+  // This function is called when the page is loaded 
   ngOnInit() {
+    // Use this subscription to get the query parameters from the route if there are any
     this.query_params_sub = this.route.queryParams.subscribe(params => {
       this.routed_id = params.reading_id
       this.routed_laterality = params.laterality
     });
+
+    // If the routed  query params  arent undefined
     if(this.routed_id != undefined && this.routed_laterality != undefined){
+
+      // Initialize some necesary graph variables
       let graph_data = [] as ChartPoint[]
       let graph_data_bilateral = [] as ChartPoint[]
+
+      // If the laterality given from the query parameters isn't BILATERAL
       if(this.routed_laterality != "BILATERAL"){
+
+        // Get the reading data from a single arm using the routed parameters
         this.reading_data_sub = this.getReadingData(this.routed_id, this.routed_laterality).subscribe(data => {
+
+          // Go through all the data and create graph data points 
           for(let i = 0; i<data.length; i++){
             graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
           }
+
+          // Set the chart data to the data from the accumulated points
           this.scatterChartData[0].data = graph_data
         })
       }
+
+      // If the laterality is given from the query parameters as BILATERAL
       else{
+
+        // First get the reading data from the LEFT_ARM
         this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
+
+          // Go through all the data and create graph data points
           for(let i = 0; i<data.length; i++){
             graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
           }
+
+          // Set the chart data to the data from the accumulated points
           this.scatterChartData[0].data = graph_data
         })
+
+        // Next get the reading data from the RIGHT_ARM
         this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
+          
+          // Go through all the data and create graph data points
           for(let i = 0; i<data.length; i++){
             graph_data_bilateral[i] = {x: data[i].time, y: data[i].ppg_reading }
           }
+
+          // Set the chart data to the data from the accumulated points
           this.scatterChartData[1].data = graph_data_bilateral
         })
       }
     }
+
+    // Regardless of routed parameters, get the paitents to put into the patients selection menu
     this.patients_sub = this.getPatients().subscribe(data => {
+
+      // Make the data be a set so there are no repeats in the selection menu
       let patients_set = new Set()
+
+      // Go through the data and add it all tot he set
       for(let  i = 0; i<data.length; i++){
         patients_set.add(data[i].patient_no)
       }
+
+      // Initialize a counter variable andt  hen loop through the patients and add them to the selection  menu
       let cnt = 0
       for(let patient of patients_set){
         this.patients[cnt] = { value: cnt, viewValue: patient}
@@ -141,6 +191,8 @@ export class GraphComponent implements OnInit {
     })
   }
 
+  // This method is called when navigating away from the Graph page
+  // All this method does is unsubscribe from each subscription to prevent memmory leaks
   ngOnDestroy(){
     if(this.query_params_sub != undefined){
       this.query_params_sub.unsubscribe()
@@ -159,7 +211,12 @@ export class GraphComponent implements OnInit {
     }
   }
 
+  // This method is called after making a selection on the patient select dropdown
   toggleSelectReading(e: any){
+
+    // Reinitialize the selections, the selection menus and the actual data
+    // each time a new patient is selected
+
     this.reading_select = undefined
     this.laterality_select = undefined
 
@@ -169,13 +226,24 @@ export class GraphComponent implements OnInit {
     this.readings_data = []
     this.lateralites_data = [] 
 
+    // Get the reading select element from the web page
     var readingSelect = document.getElementById("reading-select-field")
+
+    // If the display is not showing, make sure to show it
     if(readingSelect?.style.display != "inline-block"){
       readingSelect!.style.display = "inline-block"
     }
+
+    // If a selection is made for a patient
     if(this.patient_select != undefined){
+
+      // Get the data from the selected patient
       this.readings_of_patient_sub = this.getReadingsOfPatient(this.patients[this.patient_select].viewValue).subscribe(data => {
+        
+        // Set the data to the received from the http method
         this.readings_data = data
+
+        // Loop through the data and put it into the reading selection menu
         for(let i = 0; i<data.length;  i++){
           this.readings[i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].comments}
         }
@@ -183,32 +251,55 @@ export class GraphComponent implements OnInit {
     } 
   }
 
+  // This method is called after selecting a reading from the reading selections
   toggleSelectLaterality(e: any){
+
+    // Reinitialize the selections, the selection menus and the actual data
+    // each time a new reading is selected
     this.laterality_select = undefined
 
     this.lateralites = []
   
     this.lateralites_data = []
 
+    // Get the reading select element from the web page
     var lateralitySelect = document.getElementById("laterality-select-field")
+
+    // If the display is not showing, make sure to show it
     if(lateralitySelect?.style.display != "inline-block"){
       lateralitySelect!.style.display = "inline-block"
     }
+
+    // If a reading is selected
     if(this.reading_select != undefined){
+
+      // Set the routed id to the id of the selected reading
       this.routed_id = this.readings_data[this.reading_select].id
+
+      // If a patient is selected
       if(this.patient_select != undefined){
+
+        // Get the reading data to use for laterality selction
         this.readings_of_patient_sub = this.getReadingsOfPatient(this.patients[this.patient_select].viewValue).subscribe(data => {
+
+          // Get the laterality from a reading 
           let laterality = this.readings_data[this.reading_select!].laterality
+
+          // Check if the laterality is bilateral
           if(laterality == "BILATERAL"){
+            // If it is, set the lateralities selection menu to all 3
             this.lateralites[0] = { value: 0, viewValue: "LEFT_ARM"}
             this.lateralites[1] = { value: 1, viewValue: "RIGHT_ARM"}
             this.lateralites[2] = { value: 2, viewValue: "BILATERAL"}
 
+            // Set the actual data as well
             this.lateralites_data[0] = "LEFT_ARM"
             this.lateralites_data[1] = "RIGHT_ARM"
             this.lateralites_data[2] = "BILATERAL"
           }
+          // Laterality not bilateral
           else{
+            // Just set the data to the selected laterality
             this.lateralites[0] = { value: 0, viewValue: laterality}
             this.lateralites_data[0] = laterality!
           }
@@ -217,38 +308,61 @@ export class GraphComponent implements OnInit {
     }
   }
 
+  // Called after all three selections are made
   toggleButton(e: any){
+    // Show the run button
     var runButton = document.getElementById("run-button")
     runButton!.style.display = "inline-block"
   }
 
+  // Called when the graph button is called
   graphData(){
+    // Initialize variables for the graph
     let graph_data = [] as ChartPoint[]
     let graph_data_bilateral = [] as ChartPoint[]
+
+    // If selections are made for reading and laterality
     if(this.reading_select != undefined && this.laterality_select != undefined){
+
+      // If the selected laterality is not BILATERAL
       if(this.lateralites_data[this.laterality_select] != "BILATERAL"){
+
+        // Get the reading data from the selected reading with the seelected laterality
         this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select]).subscribe(data => {
+         
+          // Create graph points for all the data
           for(let i = 0; i<data.length; i++){
             graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
           }
+          // Set all the graph data to the accumulated points
           this.scatterChartData[0].data = graph_data
         })
       }
+      // If the laterality is bilateral
       else{
+        // First get the reading data from the left arm
         this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
+          
+          // Accumulate all the data for the left arm
           for(let i = 0; i<data.length; i++){
             graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
           }
+          // Set all the graph data to the accumulated points
           this.scatterChartData[0].data = graph_data
         })
+        // Next get the reading data from the right arm
         this.reading_data_sub_bilateral = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM").subscribe(data => {
+          // Accumulate all the data for the right arm
           for(let i = 0; i<data.length; i++){
             graph_data_bilateral[i] = {x: data[i].time, y: data[i].ppg_reading }
           }
+          // Set all the graph data to the accumulated points
           this.scatterChartData[1].data = graph_data_bilateral
         })
       }
 
+      // Change all of the select elements back to empty and reinitialize everything back to empty
+      // to get ready for a new selection
       var readingSelect = document.getElementById("reading-select-field")
       readingSelect!.style.display = "none"
 
@@ -267,6 +381,7 @@ export class GraphComponent implements OnInit {
     }
   }
 
+  //  The following methods just  call the services to call the http methods to get data
   getPatients(): Observable<Reading[]>{
     return this.readingService.getAll()
   }

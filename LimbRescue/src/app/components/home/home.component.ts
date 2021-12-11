@@ -15,7 +15,7 @@ import { GroupReading } from 'src/app/models/group-reading.model';
 import { Router } from '@angular/router';
 import { timer } from 'rxjs';
 
-
+// Use these date formats for the Date Created section of the home table
 export const MY_DATE_FORMATS = {
   parse: {
     dateInput: 'YYYY-MM-DD',
@@ -34,6 +34,7 @@ export const MY_DATE_FORMATS = {
   styleUrls: ['./home.component.sass']
 })
 export class HomeComponent implements AfterViewInit {
+  // Define variables used for  
   readings!:  Reading[];
   currentReading: Reading = {};
   reading_duration = 30;
@@ -42,6 +43,7 @@ export class HomeComponent implements AfterViewInit {
   time_passed!: number;
   value!: number;
 
+  // Definition for subscriptions
   readings_sub: any;
   reading_by_id_sub: any;
   group_by_name_sub: any;
@@ -53,10 +55,12 @@ export class HomeComponent implements AfterViewInit {
   post_sub: any;
   timer_sub: any;
 
+  // Columns to be displayedint the home table
   displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
   selection_subject = new SelectionModel<Reading>(true, []);
 
+  //Define home table components
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
   @ViewChild(MatTable) matTable!: MatTable<Reading>;
@@ -64,29 +68,33 @@ export class HomeComponent implements AfterViewInit {
 
   constructor(private router: Router, private readingService: ReadingService, private groupService: GroupService, private groupReadingService: GroupReadingService, public dialog: MatDialog) {}
 
+  // Ran when the page is initialized
   ngOnInit() {
+    // set the data source to thetable components
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
 
+    // Set up the sort
     const sortState: Sort = {active: 'id', direction: 'desc'};
     this.sort.active = sortState.active;
     this.sort.direction = sortState.direction;
     this.sort.sortChange.emit(sortState);
   }
 
+  // Called after the page has initialized
   ngAfterViewInit() {
+    // Get  all of the readings for the table and  set it to the table
     this.readings_sub = this.readingService.getAll().subscribe(
       data => {
         this.dataSource.data = data
-      },
-      error => {
-        console.log(error);
-      }
-    )
+      })
+    // Rerender the table
     this.matTable.renderRows()
   }
 
+  // Called after the page is left
   ngOnDestroy() {
+    // Unsubscribe from the subscriptions to prevent resource leaks
     if(this.readings_sub != undefined){
       this.readings_sub.unsubscribe()
     }
@@ -116,84 +124,129 @@ export class HomeComponent implements AfterViewInit {
     }
   }
 
+  // Used to open the dialog to update a reading
   openUpdateReadingDialog(id: number) {
+    // Get a reading by its  id
     this.reading_by_id_sub = this.readingService.getById(id).subscribe(
       reading_data => {
+        // open the dialog with the given options
         const dialogRef = this.dialog.open(UpdateReadingDialog, {
           data: reading_data,
           disableClose: true,
           autoFocus: true,
           width: '400px',
         });
-        this.update_dialog_ref_sub = dialogRef.afterClosed().subscribe(
-          output_data => {
-            if(output_data != undefined){
-              this.reading_update_sub = this.readingService.put(output_data, id).subscribe(response => {
+        // Used after the dialog is closed
+        this.update_dialog_ref_sub = dialogRef.afterClosed().subscribe(output_data => {
+          // See if the output data is there
+          if(output_data != undefined){
+            // Do the update
+            this.reading_update_sub = this.readingService.put(output_data, id).subscribe(response => {
+              // Get the readings again to update  the table
               this.readings_sub = this.readingService.getAll().subscribe(data => {
+                // update the table
                 this.dataSource.data = data
                 this.matTable.renderRows()
               })
-              })
-            }
+            })
           }
-        )
+        }
+      )
     })
   }
 
+  // Used to create a group
   openCreateGroupFromReadingsDialog() {
+    // Get the  selected subjects and get their ids
     let selected_subjects = this.getSelectedSubjects()
     let subject_ids = this.getSelectionArrayIds(selected_subjects)
 
+    // Create a group to be passed  in
     let group = new Group()
     group.reading_ids = subject_ids
 
+    // Create the dialog withthe given options
     const dialogRef = this.dialog.open(CreateGroupFromReadingsDialog, {
       data: group,
       disableClose: true,
       autoFocus: true,
       width: '500px',
     });
-    this.create_dialog_ref_sub = dialogRef.afterClosed().subscribe(
-      output_data => {
-        if(output_data != undefined){
-          output_data.id = 1
-          this.post_sub = this.groupService.post(output_data).subscribe(data => {
-            console.log(data)
-            this.group_by_name_sub = this.groupService.get_by_name(output_data.name).subscribe(result => {
-              let reading_id_arr = result.reading_ids!.split(",").map(Number)
-              let groupReading = new GroupReading()
-              groupReading.id = 1
-              groupReading.group_id = result.id
-              for(let num of reading_id_arr){
-                groupReading.reading_id = num
-                this.group_create_sub = this.groupReadingService.post(groupReading).subscribe(data => {})
-              }
-            })
+
+    // After the dialog is closed
+    this.create_dialog_ref_sub = dialogRef.afterClosed().subscribe(output_data => {
+      // If the dialog wasnt filled out before closing
+      if(output_data != undefined){
+        // set the id to 1 so the backend can figure out the correect id
+        output_data.id = 1
+
+        // Create the group
+        this.post_sub = this.groupService.post(output_data).subscribe(data => {
+          // Get the group that you just created
+          this.group_by_name_sub = this.groupService.get_by_name(output_data.name).subscribe(result => {
+            // Get the reading ids in the group
+            let reading_id_arr = result.reading_ids!.split(",").map(Number)
+
+            // Create a new group reading object
+            let groupReading = new GroupReading()
+
+            // Set the id to 1 so the  backend can find the correct id
+            groupReading.id = 1
+
+            // set the group id to the id of the group you just creeated
+            groupReading.group_id = result.id
+
+            //Go through each reeading id and create a connection in the backend
+            for(let num of reading_id_arr){
+              groupReading.reading_id = num
+              this.group_create_sub = this.groupReadingService.post(groupReading).subscribe(data => {})
+            }
           })
-        }
-        this.selection_subject.clear()
+        })
       }
-    )
+      // reset the selection
+      this.selection_subject.clear()
+    })
   }
 
+  // Used when the start reading button is pressed
   startReading(){
-    this.date_and_time_sub = this.readingService.getDateAndtime(parseInt(String(this.reading_duration))*1000).subscribe(time => {console.log(time)})
+    // Get the current date and time
+    this.date_and_time_sub = this.readingService.getDateAndtime(parseInt(String(this.reading_duration))*1000).subscribe(time => {})
+    
+    // Create a timer with 
     let timer_var = timer(0, 1000)
+
+    // Create a variable for the timer length
     let timer_length = parseInt(String(this.reading_duration))+3
+
+    // Start the spinner
     this.show_spinner = true
+    
+    // Start to get  timer values
     this.timer_sub = timer_var.subscribe(val => {
+      // Get the  amount of time passed
       this.time_passed = val
+
+      // Get the amount of time left
       this.time_left = timer_length-val
+
+      // This value is used for the  spinner completion value for a progress spinner
       this.value = parseInt(String((this.time_passed/(timer_length-1))*100), 10)
-      console.log(this.value)
+
+      // If the timer is over
       if(this.time_left == 0){
+        // Unsubscribe to stop timer
         this.timer_sub.unsubscribe()
+        // Stop showingthe  spinner
         this.show_spinner = false
       }
     })
   }
 
+  // Called from the  show graph button on the home page
   showGraph(id: number, lat: string){
+    // Navigate to the homepage wit query parameters to show graph
     this.router.navigate(['/graph'], { queryParams: {reading_id: id, laterality: lat}})
   }
 
@@ -232,10 +285,12 @@ export class HomeComponent implements AfterViewInit {
     return `${this.selection_subject.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
   }
 
+  // Return the subjects that are selected
   getSelectedSubjects() {
     return this.selection_subject.selected
   }
   
+  // Get the ids for the  selected subjects
   getSelectionArrayIds(arr: Array<Reading>){
     let reading_ids = ''
     arr.forEach(item => reading_ids+=item.id+',')
