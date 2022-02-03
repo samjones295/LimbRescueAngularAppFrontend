@@ -2,6 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Constants } from 'src/app/global/Constants';
+
+const baseUrl = Constants.IP;
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +32,8 @@ export class AuthenticationService {
   authenticationService(username: string, password: string) {
     // Create an authentication token using the username  and password
     let authToken = this.createBasicAuthToken(username, password)
-    return this.http.get(`http://localhost:8080/api/v1/basicauth`,
+    
+    return this.http.get(`${baseUrl}/api/v1/basicauth`,
       { headers: { authorization: authToken } }).pipe(map((res) => {
         this.username = username;
         this.password = password;

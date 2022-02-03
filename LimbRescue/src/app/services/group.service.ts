@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Group } from '../models/group.model';
+import { Constants } from '../global/Constants';
 
-const baseUrl = 'http://localhost:8080';
+const baseUrl = Constants.IP;
 
 @Injectable({
   providedIn: 'root'
