@@ -5,6 +5,9 @@ import { Reading } from 'src/app/models/reading.model';
 import { ReadingService } from 'src/app/services/reading.service';
 import { ReadingDataService } from 'src/app/services/reading-data.service';
 import { ActivatedRoute } from '@angular/router';
+import { ngxCsv } from 'ngx-csv/ngx-csv';
+import { CsvData } from 'src/app/models/csv-data.model';
+import { ExportService } from 'src/app/services/export.service';
 
 @Component({
   selector: 'app-graph',
@@ -108,7 +111,7 @@ export class GraphComponent implements OnInit {
 
   // Route is to get parameters from coming from a different page
   // The two services are used to get http requests from the backend
-  constructor(private route: ActivatedRoute, private readingService: ReadingService, private readingDataService: ReadingDataService) { }
+  constructor(private route: ActivatedRoute, private readingService: ReadingService, private readingDataService: ReadingDataService, private csvDataService: ExportService) { }
 
   // This function is called when the page is loaded 
   ngOnInit() {
@@ -312,7 +315,9 @@ export class GraphComponent implements OnInit {
   toggleButton(e: any){
     // Show the run button
     var runButton = document.getElementById("run-button")
+    var csvButton = document.getElementById("csv-button")
     runButton!.style.display = "inline-block"
+    csvButton!.style.display = "inline-block"
   }
 
   // Called when the graph button is called
@@ -323,6 +328,8 @@ export class GraphComponent implements OnInit {
 
     // If selections are made for reading and laterality
     if(this.reading_select != undefined && this.laterality_select != undefined){
+      console.log("READING SELECT: ")
+      console.log(this.readings_data[this.reading_select])
 
       // If the selected laterality is not BILATERAL
       if(this.lateralites_data[this.laterality_select] != "BILATERAL"){
@@ -381,6 +388,42 @@ export class GraphComponent implements OnInit {
     }
   }
 
+  fileData = [] as CsvData[]
+  csvDownload(){
+    let fileTitle: any = "defaultTitle"
+
+    // get the meta data for the reading, specifically the time stamp of the reading
+    if (this.reading_select != undefined && this.patient_select != undefined){
+      this,this.getCsvMetaData(this.readings_data[this.reading_select].id, this.patients[this.patient_select].viewValue).subscribe(data => {
+        fileTitle = data[0].date_created
+        console.log(fileTitle)
+      })
+    }
+
+    // setting options for the CVS file, see https://www.npmjs.com/package/ngx-csv for detials
+    var options = { 
+      fieldSeparator: ',',
+      quoteStrings: '"',
+      decimalseparator: '.',
+      showLabels: true, 
+      showTitle: true,
+      title: "",
+      useBom: true,
+      noDownload: false,
+      headers: ["ppg", "time", "laterality"]
+    };
+
+    // get the reading data that will be in the csv file
+    if (this.reading_select != undefined && this.laterality_select != undefined) {
+      this.getCsvData(this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select]).subscribe(data => {
+        options.title = fileTitle
+        this.fileData = data
+        new ngxCsv(this.fileData, fileTitle, options);
+      })
+    }
+
+  }
+
   //  The following methods just  call the services to call the http methods to get data
   getPatients(): Observable<Reading[]>{
     return this.readingService.getAll()
@@ -396,6 +439,14 @@ export class GraphComponent implements OnInit {
 
   getReadingData(reading_id: number, laterality: string){
     return this.readingDataService.getByReadingIdAndLaterality(reading_id, laterality)
+  }
+
+  getCsvData(reading_id: number, laterality: string){
+    return this.csvDataService.getDataForCSV(reading_id, laterality)
+  }
+
+  getCsvMetaData(id: number, patient_no: string){
+    return this.csvDataService.getMetaDataForCSV(id, patient_no)
   }
 
 }
