@@ -11,8 +11,8 @@ import { GroupsComponent } from './components/groups/groups.component';
 
 
 const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: '', redirectTo: 'home',  pathMatch: 'full' },
+  { path: 'home',  component: HomeComponent,canActivate: [AuthGuard] },
   { path: 'graph', component: GraphComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent, canActivate: [LoggedInAuthGuard] },
   { path: 'machine-learning', component: MachineLearningComponent, canActivate: [AuthGuard] },
@@ -22,7 +22,8 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes,{onSameUrlNavigation: 'reload'})],
+
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

@@ -2,27 +2,28 @@
   <nav class="navbar navbar-expand navbar-dark bg-dark">
     <a routerLink="home" class="navbar-brand">Limb Rescue</a>
     <div class="navbar-nav mr-auto">
-      <li *ngIf="isLoggedIn$ | async as isLoggedIn" class="nav-item">
+      <li *ngIf="isLoggedIn$ " class="nav-item">
         <a routerLink="home" class="nav-link">Home</a>
       </li>
-      <li *ngIf="isLoggedIn$ | async as isLoggedIn" class="nav-item">
+      <li *ngIf="isLoggedIn$ " class="nav-item">
         <a routerLink="graph" class="nav-link">Graph</a>
       </li>
-      <li *ngIf="isLoggedIn$ | async as isLoggedIn" class="nav-item">
+      <li *ngIf="isLoggedIn$ " class="nav-item">
         <a routerLink="machine-learning" class="nav-link">Machine Learning</a>
       </li>
-      <li *ngIf="isLoggedIn$ | async as isLoggedIn" class="nav-item">
+      <li *ngIf="isLoggedIn$ " class="nav-item">
         <a routerLink="results" class="nav-link">Results</a>
       </li>
-      <li *ngIf="isLoggedIn$ | async as isLoggedIn" class="nav-item">
+      <li *ngIf="isLoggedIn$ " class="nav-item">
         <a routerLink="groups" class="nav-link">Groups</a>
-      </li>      
+      </li>
     </div>
     <div>
       <ul class="navbar-nav navbar-collapse justify-content-end">
         <li>
-            <a *ngIf="isLoggedIn$ | async as isLoggedIn" class="nav-link" href="/login" (click)=handleLogout()>Logout</a>
+            <a *ngIf="isLoggedIn$ " class="nav-link" href="/login" (click)=handleLogout()>Logout</a>
         </li>
+
     </ul>
     </div>
   </nav>
