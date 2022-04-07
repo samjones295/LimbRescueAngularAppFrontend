@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ChartDataSets, ChartOptions, ChartType, ChartPoint} from 'chart.js';
 import { Observable } from 'rxjs';
 import { Reading } from 'src/app/models/reading.model';
@@ -10,11 +10,12 @@ import { CsvData } from 'src/app/models/csv-data.model';
 import { ExportService } from 'src/app/services/export.service';
 
 @Component({
-  selector: 'app-graph',
-  templateUrl: './graph.component.html',
-  styleUrls: ['./graph.component.sass']
+  selector: 'app-compare-graphs',
+  templateUrl: './compare-graphs.component.html',
+  styleUrls: ['./compare-graphs.component.sass']
 })
-export class GraphComponent implements OnInit {
+export class CompareGraphsComponent implements OnInit {
+
   // Define variables to hold data in the format for the select elements
   readings = [] as any
   patients = [] as any
