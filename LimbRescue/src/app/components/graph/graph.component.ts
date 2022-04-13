@@ -246,9 +246,9 @@ export class GraphComponent implements OnInit {
         // Set the data to the received from the http method
         this.readings_data = data
 
-        // Loop through the data and put it into the reading selection menu
+        // Loop through the data and put it into the reading selection menu in reverse order so the most recent reading it at the top
         for(let i = 0; i<data.length;  i++){
-          this.readings[i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].comments}
+          this.readings[(data.length - 1) - i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].comments}
         }
       })
     } 
