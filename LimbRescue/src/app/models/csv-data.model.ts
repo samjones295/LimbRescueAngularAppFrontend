@@ -6,7 +6,7 @@ export class CsvData {
 
 export class CsvMetaData{
     comments?: string;
-    date_created?: Date;
+    date_created?: string;
     patient_no?: String;
     id?: number;
     laterality?: string;
