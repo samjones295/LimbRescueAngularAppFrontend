@@ -331,6 +331,9 @@ export class GraphComponent implements OnInit {
 
   // Called when the graph button is called
   graphData(){
+    // clear the existing scatter chart data if there is any (to account for going from a biltateral to unilateral reading)
+    this.scatterChartData[0].data = []
+    this.scatterChartData[1].data = []
     // Initialize variables for the graph
     let graph_data = [] as ChartPoint[]
     let graph_data_bilateral = [] as ChartPoint[]
