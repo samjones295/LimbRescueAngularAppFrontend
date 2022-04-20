@@ -35,7 +35,6 @@ import { HttpInterceptorService } from './http-interceptor.service';
 import { ChartsModule } from 'ng2-charts';
 import { LoggedInAuthGuardService } from './components/login/logged-in-auth-guard.service';
 import { GroupsComponent } from './components/groups/groups.component';
-import { CompareGraphsComponent } from './components/compare-graphs/compare-graphs.component';
 
 @NgModule({
   declarations: [
@@ -47,8 +46,7 @@ import { CompareGraphsComponent } from './components/compare-graphs/compare-grap
     LoginComponent,
     MachineLearningComponent,
     ResultsComponent,
-    GroupsComponent,
-    CompareGraphsComponent,
+    GroupsComponent
   ],
   imports: [
     BrowserModule,
