@@ -110,7 +110,7 @@ export class GraphComponent implements OnInit {
   public scatterChartType: ChartType = 'scatter';
 
   // Route is to get parameters from coming from a different page
-  // The two services are used to get http requests from the backend
+  // The three services are used to get http requests from the backend
   constructor(private route: ActivatedRoute, private readingService: ReadingService, private readingDataService: ReadingDataService, private csvDataService: ExportService) { }
 
   // This function is called when the page is loaded 
@@ -319,7 +319,7 @@ export class GraphComponent implements OnInit {
     runButton!.style.display = "inline-block"
     csvButton!.style.display = "inline-block"
     /* sp22; 
-      We follow the existng logic, we make the csv button available after all three selections are made.
+      We follow the existng logic of the application, and make the csv button available after all three selections are made.
       We need this method to make the selection values persist after graphData() is called because it wipes all the selections before returning.
       Future reccomendations are refactor code to allow selection values to persist through graphing
     */
@@ -401,12 +401,14 @@ export class GraphComponent implements OnInit {
     }
   }
 
-  // class variables needed for selection values to persist
+  // class variables needed for reading selection values to persist so we can download a csv data ofa reading
   csv_reading_id: number = 0
   csv_patiend_no: string = ""
   csv_reading_data_id: number = 0
   csv_laterality: string = ""
+
   // method that stores selection values
+  // this method is called in toggleButton() above after all three selections are made
   setcsvData(reading_id: number, patient_no: string, reading_data_id: number, laterality: string) {
     // id for records in reading_data table
     this.csv_reading_id = reading_id
@@ -416,8 +418,15 @@ export class GraphComponent implements OnInit {
     this.csv_laterality = laterality
   }
 
+  // method called when Download CSV button is clicked
   csvDownload(){
-    // setting options for the CVS file, see https://www.npmjs.com/package/ngx-csv for detials
+    /* sp22
+    We use ngx-csv package to enable easy csv exporting. The method that actually generates the csv files
+    is ngxCsv(fileData, fileName, options). This is a simple library selected to keep complexity to a minimum.
+    Please visit https://www.npmjs.com/package/ngx-csv for details of this library.
+    about this package. 
+    */
+    // setting options for the CVS file
     var options = { 
       fieldSeparator: ',',
       quoteStrings: '"',
@@ -448,9 +457,12 @@ export class GraphComponent implements OnInit {
     if (this.csv_laterality == "BILATERAL") {
       // get both arms if its a bilateral reading
       this.getCsvData(this.csv_reading_data_id, "LEFT_ARM").subscribe(data => {
+        // add left arm reading to csv data
         fileData = data
         this.getCsvData(this.csv_reading_data_id, "RIGHT_ARM").subscribe(data => {
+          // add right arm reading to csv data
           fileData = fileData.concat(data)
+          // generate csv file to be downloaded
           new ngxCsv(fileData, filename, options);
         })
       })
@@ -459,6 +471,7 @@ export class GraphComponent implements OnInit {
       // reading isnt bilateral, only need to get one arm reading
       this.getCsvData(this.csv_reading_data_id, this.csv_laterality).subscribe(data => {
         fileData = data
+        // generate csv file to be downloaded
         new ngxCsv(fileData, filename, options);
       })
     }
