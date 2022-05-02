@@ -46,7 +46,7 @@ import { GroupsComponent } from './components/groups/groups.component';
     LoginComponent,
     MachineLearningComponent,
     ResultsComponent,
-    GroupsComponent,
+    GroupsComponent
   ],
   imports: [
     BrowserModule,

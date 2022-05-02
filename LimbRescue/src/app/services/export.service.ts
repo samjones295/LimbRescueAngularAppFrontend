@@ -11,13 +11,17 @@ const baseUrl = Constants.IP;
 })
 export class ExportService {
 
+  /*
+  This service class contains methods that support the creation of csv files.
+  */
   constructor(private http: HttpClient) { }
 
-  // get selected columns from a reading-data to export to a .csv file
+  // given a reading_id and laterality, return the reading data
   getDataForCSV(reading_id: number, laterality: string){
     return this.http.get<CsvData[]>(baseUrl+"/output?reading_id="+reading_id+"&laterality="+laterality)
   }
 
+  // given a reading id and a patient number, return the meta data for that reading
   getMetaDataForCSV(id: number, patient_no: string){
     return this.http.get<CsvMetaData[]>(baseUrl+"/reading_output?id="+id+"&patient_no="+patient_no)
   }

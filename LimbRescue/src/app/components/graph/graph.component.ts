@@ -110,7 +110,7 @@ export class GraphComponent implements OnInit {
   public scatterChartType: ChartType = 'scatter';
 
   // Route is to get parameters from coming from a different page
-  // The two services are used to get http requests from the backend
+  // The three services are used to get http requests from the backend
   constructor(private route: ActivatedRoute, private readingService: ReadingService, private readingDataService: ReadingDataService, private csvDataService: ExportService) { }
 
   // This function is called when the page is loaded 
@@ -246,9 +246,9 @@ export class GraphComponent implements OnInit {
         // Set the data to the received from the http method
         this.readings_data = data
 
-        // Loop through the data and put it into the reading selection menu
+        // Loop through the data and put it into the reading selection menu in reverse order so the most recent reading it at the top
         for(let i = 0; i<data.length;  i++){
-          this.readings[i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].comments}
+          this.readings[(data.length - 1) - i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].comments}
         }
       })
     } 
@@ -318,10 +318,22 @@ export class GraphComponent implements OnInit {
     var csvButton = document.getElementById("csv-button")
     runButton!.style.display = "inline-block"
     csvButton!.style.display = "inline-block"
+    /* sp22; 
+      We follow the existng logic of the application, and make the csv button available after all three selections are made.
+      We need this method to make the selection values persist after graphData() is called because it wipes all the selections before returning.
+      Future reccomendations are refactor code to allow selection values to persist through graphing
+    */
+    if (this.reading_select != undefined && this.patient_select != undefined && this.laterality_select != undefined){
+      this.setcsvData(this.readings_data[this.reading_select].id, this.patients[this.patient_select].viewValue, this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select])
+    }
+    
   }
 
   // Called when the graph button is called
   graphData(){
+    // clear the existing scatter chart data if there is any (to account for going from a biltateral to unilateral reading)
+    this.scatterChartData[0].data = []
+    this.scatterChartData[1].data = []
     // Initialize variables for the graph
     let graph_data = [] as ChartPoint[]
     let graph_data_bilateral = [] as ChartPoint[]
@@ -340,6 +352,7 @@ export class GraphComponent implements OnInit {
           // Create graph points for all the data
           for(let i = 0; i<data.length; i++){
             graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+
           }
           // Set all the graph data to the accumulated points
           this.scatterChartData[0].data = graph_data
@@ -388,40 +401,80 @@ export class GraphComponent implements OnInit {
     }
   }
 
-  fileData = [] as CsvData[]
+  // class variables needed for reading selection values to persist so we can download a csv data ofa reading
+  csv_reading_id: number = 0
+  csv_patiend_no: string = ""
+  csv_reading_data_id: number = 0
+  csv_laterality: string = ""
+
+  // method that stores selection values
+  // this method is called in toggleButton() above after all three selections are made
+  setcsvData(reading_id: number, patient_no: string, reading_data_id: number, laterality: string) {
+    // id for records in reading_data table
+    this.csv_reading_id = reading_id
+    this.csv_patiend_no = patient_no
+    // id for records in reading table
+    this.csv_reading_data_id = reading_data_id
+    this.csv_laterality = laterality
+  }
+
+  // method called when Download CSV button is clicked
   csvDownload(){
-    let fileTitle: any = "defaultTitle"
-
-    // get the meta data for the reading, specifically the time stamp of the reading
-    if (this.reading_select != undefined && this.patient_select != undefined){
-      this,this.getCsvMetaData(this.readings_data[this.reading_select].id, this.patients[this.patient_select].viewValue).subscribe(data => {
-        fileTitle = data[0].date_created
-        console.log(fileTitle)
-      })
-    }
-
-    // setting options for the CVS file, see https://www.npmjs.com/package/ngx-csv for detials
+    /* sp22
+    We use ngx-csv package to enable easy csv exporting. The method that actually generates the csv files
+    is ngxCsv(fileData, fileName, options). This is a simple library selected to keep complexity to a minimum.
+    Please visit https://www.npmjs.com/package/ngx-csv for details of this library.
+    about this package. 
+    */
+    // setting options for the CVS file
     var options = { 
       fieldSeparator: ',',
       quoteStrings: '"',
       decimalseparator: '.',
       showLabels: true, 
       showTitle: true,
-      title: "",
+      title: "default_title",
       useBom: true,
       noDownload: false,
       headers: ["ppg", "time", "laterality"]
     };
+    
+    // name of the csv file when downloaded
+    var filename = this.csv_laterality + "_reading_" + this.csv_reading_id.toString()
 
-    // get the reading data that will be in the csv file
-    if (this.reading_select != undefined && this.laterality_select != undefined) {
-      this.getCsvData(this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select]).subscribe(data => {
-        options.title = fileTitle
-        this.fileData = data
-        new ngxCsv(this.fileData, fileTitle, options);
+    // get the meta data for the reading, specifically the time stamp of the reading
+    if (this.reading_select != undefined && this.patient_select != undefined){
+      this.getCsvMetaData(this.csv_reading_id, this.csv_patiend_no).subscribe(data => {
+        options.title = data[0].date_created!
+        // append the date to the title
+        filename = filename  + "_on" + data[0].date_created!
       })
     }
 
+    // all the json data that will be put into the csv files
+    var fileData = [] as CsvData[]
+
+    if (this.csv_laterality == "BILATERAL") {
+      // get both arms if its a bilateral reading
+      this.getCsvData(this.csv_reading_data_id, "LEFT_ARM").subscribe(data => {
+        // add left arm reading to csv data
+        fileData = data
+        this.getCsvData(this.csv_reading_data_id, "RIGHT_ARM").subscribe(data => {
+          // add right arm reading to csv data
+          fileData = fileData.concat(data)
+          // generate csv file to be downloaded
+          new ngxCsv(fileData, filename, options);
+        })
+      })
+      
+    } else {
+      // reading isnt bilateral, only need to get one arm reading
+      this.getCsvData(this.csv_reading_data_id, this.csv_laterality).subscribe(data => {
+        fileData = data
+        // generate csv file to be downloaded
+        new ngxCsv(fileData, filename, options);
+      })
+    }
   }
 
   //  The following methods just  call the services to call the http methods to get data
