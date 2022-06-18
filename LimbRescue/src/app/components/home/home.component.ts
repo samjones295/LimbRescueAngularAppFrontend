@@ -56,7 +56,7 @@ export class HomeComponent implements AfterViewInit {
   timer_sub: any;
 
   // Columns to be displayedint the home table
-  displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
+  displayedColumns: string[] = ['select', 'editor', 'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
   selection_subject = new SelectionModel<Reading>(true, []);
 
