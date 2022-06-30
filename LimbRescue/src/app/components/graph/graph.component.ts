@@ -46,7 +46,7 @@ export class GraphComponent implements OnInit {
   public scatterChartOptions: ChartOptions = {
     responsive: true,
     legend: {
-      display: false
+      display: true
     },
     scales:  {
       xAxes: [{
