@@ -311,28 +311,28 @@ export class HomeComponent implements AfterViewInit {
 })
 export class UpdateReadingDialog {
   id: string
-  patient_no: string | undefined
+  patient_num: string | undefined
   date_created: Date | undefined
   laterality: string | undefined
-  comments: string | undefined
+  notes: string | undefined
 
   form!: FormGroup
 
   constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<UpdateReadingDialog>, @Inject(MAT_DIALOG_DATA) public data: Reading) {
     this.id = data.id
-    this.patient_no = data.patient_no
+    this.patient_num = data.patient_num
     this.date_created = data.date_created
     this.laterality = data.laterality
-    this.comments = data.comments
+    this.notes = data.notes
   }
 
   ngOnInit() {
     this.form = this.fb.group({
         id: [this.id, []],
-        patient_no: [this.patient_no, []],
+        patient_num: [this.patient_num, []],
         date_created: [this.date_created, []],
         laterality: [this.laterality, []],
-        comments: [this.comments, []]
+        notes: [this.notes, []]
     });
   }
 

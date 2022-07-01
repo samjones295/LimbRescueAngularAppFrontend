@@ -136,7 +136,7 @@ export class GraphComponent implements OnInit {
 
           // Go through all the data and create graph data points 
           for(let i = 0; i<data.length; i++){
-            graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+            graph_data[i] = {x: data[i].record_time, y: data[i].ppg_val }
           }
 
           // Set the chart data to the data from the accumulated points
@@ -152,7 +152,7 @@ export class GraphComponent implements OnInit {
 
           // Go through all the data and create graph data points
           for(let i = 0; i<data.length; i++){
-            graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+            graph_data[i] = {x: data[i].record_time, y: data[i].ppg_val }
           }
 
           // Set the chart data to the data from the accumulated points
@@ -164,7 +164,7 @@ export class GraphComponent implements OnInit {
           
           // Go through all the data and create graph data points
           for(let i = 0; i<data.length; i++){
-            graph_data_bilateral[i] = {x: data[i].time, y: data[i].ppg_reading }
+            graph_data_bilateral[i] = {x: data[i].record_time, y: data[i].ppg_val }
           }
 
           // Set the chart data to the data from the accumulated points
@@ -181,7 +181,7 @@ export class GraphComponent implements OnInit {
 
       // Go through the data and add it all tot he set
       for(let  i = 0; i<data.length; i++){
-        patients_set.add(data[i].patient_no)
+        patients_set.add(data[i].patient_num)
       }
 
       // Initialize a counter variable andt  hen loop through the patients and add them to the selection  menu
@@ -248,7 +248,7 @@ export class GraphComponent implements OnInit {
 
         // Loop through the data and put it into the reading selection menu in reverse order so the most recent reading it at the top
         for(let i = 0; i<data.length;  i++){
-          this.readings[(data.length - 1) - i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].comments}
+          this.readings[(data.length - 1) - i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].notes}
         }
       })
     } 
@@ -351,7 +351,7 @@ export class GraphComponent implements OnInit {
          
           // Create graph points for all the data
           for(let i = 0; i<data.length; i++){
-            graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+            graph_data[i] = {x: data[i].record_time, y: data[i].ppg_val }
 
           }
           // Set all the graph data to the accumulated points
@@ -365,7 +365,7 @@ export class GraphComponent implements OnInit {
           
           // Accumulate all the data for the left arm
           for(let i = 0; i<data.length; i++){
-            graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+            graph_data[i] = {x: data[i].record_time, y: data[i].ppg_val }
           }
           // Set all the graph data to the accumulated points
           this.scatterChartData[0].data = graph_data
@@ -374,7 +374,7 @@ export class GraphComponent implements OnInit {
         this.reading_data_sub_bilateral = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM").subscribe(data => {
           // Accumulate all the data for the right arm
           for(let i = 0; i<data.length; i++){
-            graph_data_bilateral[i] = {x: data[i].time, y: data[i].ppg_reading }
+            graph_data_bilateral[i] = {x: data[i].record_time, y: data[i].ppg_val }
           }
           // Set all the graph data to the accumulated points
           this.scatterChartData[1].data = graph_data_bilateral
@@ -403,16 +403,16 @@ export class GraphComponent implements OnInit {
 
   // class variables needed for reading selection values to persist so we can download a csv data ofa reading
   csv_reading_id: number = 0
-  csv_patiend_no: string = ""
+  csv_patiend_num: string = ""
   csv_reading_data_id: number = 0
   csv_laterality: string = ""
 
   // method that stores selection values
   // this method is called in toggleButton() above after all three selections are made
-  setcsvData(reading_id: number, patient_no: string, reading_data_id: number, laterality: string) {
+  setcsvData(reading_id: number, patient_num: string, reading_data_id: number, laterality: string) {
     // id for records in reading_data table
     this.csv_reading_id = reading_id
-    this.csv_patiend_no = patient_no
+    this.csv_patiend_num = patient_num
     // id for records in reading table
     this.csv_reading_data_id = reading_data_id
     this.csv_laterality = laterality
@@ -444,7 +444,7 @@ export class GraphComponent implements OnInit {
 
     // get the meta data for the reading, specifically the time stamp of the reading
     if (this.reading_select != undefined && this.patient_select != undefined){
-      this.getCsvMetaData(this.csv_reading_id, this.csv_patiend_no).subscribe(data => {
+      this.getCsvMetaData(this.csv_reading_id, this.csv_patiend_num).subscribe(data => {
         options.title = data[0].date_created!
         // append the date to the title
         filename = filename  + "_on" + data[0].date_created!
@@ -498,8 +498,8 @@ export class GraphComponent implements OnInit {
     return this.csvDataService.getDataForCSV(reading_id, laterality)
   }
 
-  getCsvMetaData(id: number, patient_no: string){
-    return this.csvDataService.getMetaDataForCSV(id, patient_no)
+  getCsvMetaData(id: number, patient_num: string){
+    return this.csvDataService.getMetaDataForCSV(id, patient_num)
   }
 
 }

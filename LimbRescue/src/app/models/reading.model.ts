@@ -1,8 +1,8 @@
 export class Reading {
     id?: any
-    patient_no?: string
+    patient_num?: string
     date_created?: Date
     laterality?: string
     active?: string
-    comments?: string
+    notes?: string
 }

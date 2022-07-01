@@ -17,24 +17,24 @@ export class ReadingService {
     return this.http.get<Reading[]>(baseUrl+'/readings');
   }
 
-  getAllOfPatient(patient_no: string): Observable<Reading[]> {
-    return this.http.get<Reading[]>(baseUrl+'/readings?patient_no='+patient_no);
+  getAllOfPatient(patient_num: string): Observable<Reading[]> {
+    return this.http.get<Reading[]>(baseUrl+'/readings?patient_num='+patient_num);
   }
 
   getById(id: number): Observable<Reading>{
     return this.http.get<Reading>(baseUrl+'/reading/'+id)
   }
 
-  getByString(patient_no: string): Observable<Reading[]>{
-    return this.http.get<Reading[]>(baseUrl+'/reading?patient_no='+patient_no)
+  getByString(patient_num: string): Observable<Reading[]>{
+    return this.http.get<Reading[]>(baseUrl+'/reading?patient_num='+patient_num)
   }
 
   put(reading: Reading, id: number){
     const body = {id: id,
-                  patient_no: reading.patient_no,
+                  patient_num: reading.patient_num,
                   date_created: reading.date_created,
                   laterality: reading.laterality,
-                  comments: reading.comments}
+                  notes: reading.notes}
     return this.http.put(baseUrl+'/reading/'+id, body, {observe: 'response'})
   }
 
