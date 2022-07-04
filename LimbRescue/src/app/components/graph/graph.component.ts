@@ -52,7 +52,7 @@ export class GraphComponent implements OnInit {
       xAxes: [{
         scaleLabel: {
           display: true,
-          labelString: 'Time',
+          labelString: 'Time (s)',
           fontSize: 25
         },
         ticks: {
@@ -89,6 +89,7 @@ export class GraphComponent implements OnInit {
   public scatterChartData: ChartDataSets[] = [
     {
       data: [],
+      label: "",
       borderColor: 'red',
       pointRadius: 3,
       pointBackgroundColor: 'black',
@@ -98,6 +99,7 @@ export class GraphComponent implements OnInit {
     {
       data: [],
       borderColor: 'blue',
+      label: "",
       pointRadius: 3,
       pointBackgroundColor: 'black',
       showLine: true,
@@ -141,6 +143,7 @@ export class GraphComponent implements OnInit {
 
           // Set the chart data to the data from the accumulated points
           this.scatterChartData[0].data = graph_data
+          this.scatterChartData[0].label = "Bi-Laterial";
         })
       }
 
@@ -157,6 +160,7 @@ export class GraphComponent implements OnInit {
 
           // Set the chart data to the data from the accumulated points
           this.scatterChartData[0].data = graph_data
+          this.scatterChartData[0].label = "Left Arm";
         })
 
         // Next get the reading data from the RIGHT_ARM
@@ -168,7 +172,9 @@ export class GraphComponent implements OnInit {
           }
 
           // Set the chart data to the data from the accumulated points
-          this.scatterChartData[1].data = graph_data_bilateral
+          this.scatterChartData[1].data = graph_data_bilateral;
+
+          this.scatterChartData[1].label = "Right Arm";
         })
       }
     }
@@ -248,7 +254,7 @@ export class GraphComponent implements OnInit {
 
         // Loop through the data and put it into the reading selection menu in reverse order so the most recent reading it at the top
         for(let i = 0; i<data.length;  i++){
-          this.readings[(data.length - 1) - i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created + " Comments: " + data[i].notes}
+          this.readings[(data.length - 1) - i] = { value: i, viewValue: "ID: "+data[i].id +" Date Created: "+data[i].date_created}
         }
       })
     } 
@@ -403,16 +409,16 @@ export class GraphComponent implements OnInit {
 
   // class variables needed for reading selection values to persist so we can download a csv data ofa reading
   csv_reading_id: number = 0
-  csv_patiend_num: string = ""
+  csv_patiend_no: string = ""
   csv_reading_data_id: number = 0
   csv_laterality: string = ""
 
   // method that stores selection values
   // this method is called in toggleButton() above after all three selections are made
-  setcsvData(reading_id: number, patient_num: string, reading_data_id: number, laterality: string) {
+  setcsvData(reading_id: number, patient_no: string, reading_data_id: number, laterality: string) {
     // id for records in reading_data table
     this.csv_reading_id = reading_id
-    this.csv_patiend_num = patient_num
+    this.csv_patiend_no = patient_no
     // id for records in reading table
     this.csv_reading_data_id = reading_data_id
     this.csv_laterality = laterality
@@ -444,7 +450,7 @@ export class GraphComponent implements OnInit {
 
     // get the meta data for the reading, specifically the time stamp of the reading
     if (this.reading_select != undefined && this.patient_select != undefined){
-      this.getCsvMetaData(this.csv_reading_id, this.csv_patiend_num).subscribe(data => {
+      this.getCsvMetaData(this.csv_reading_id, this.csv_patiend_no).subscribe(data => {
         options.title = data[0].date_created!
         // append the date to the title
         filename = filename  + "_on" + data[0].date_created!
@@ -498,8 +504,8 @@ export class GraphComponent implements OnInit {
     return this.csvDataService.getDataForCSV(reading_id, laterality)
   }
 
-  getCsvMetaData(id: number, patient_num: string){
-    return this.csvDataService.getMetaDataForCSV(id, patient_num)
+  getCsvMetaData(id: number, patient_no: string){
+    return this.csvDataService.getMetaDataForCSV(id, patient_no)
   }
 
 }
