@@ -129,7 +129,7 @@ export class GraphComponent implements OnInit {
       // Initialize some necesary graph variables
       let graph_data = [] as ChartPoint[]
       let graph_data_bilateral = [] as ChartPoint[]
-
+            
       // If the laterality given from the query parameters isn't BILATERAL
       if(this.routed_laterality != "BILATERAL"){
 
@@ -179,7 +179,7 @@ export class GraphComponent implements OnInit {
       }
     }
 
-    // Regardless of routed parameters, get the paitents to put into the patients selection menu
+    // Regardless of routed parameters, get the patients to put into the patients selection menu
     this.patients_sub = this.getPatients().subscribe(data => {
 
       // Make the data be a set so there are no repeats in the selection menu
@@ -190,7 +190,7 @@ export class GraphComponent implements OnInit {
         patients_set.add(data[i].patient_num)
       }
 
-      // Initialize a counter variable andt  hen loop through the patients and add them to the selection  menu
+      // Initialize a counter variable and then loop through the patients and add them to the selection  menu
       let cnt = 0
       for(let patient of patients_set){
         this.patients[cnt] = { value: cnt, viewValue: patient}
@@ -198,6 +198,8 @@ export class GraphComponent implements OnInit {
         cnt++
       }
     })
+
+    this.setInit();
   }
 
   // This method is called when navigating away from the Graph page
@@ -225,6 +227,7 @@ export class GraphComponent implements OnInit {
 
     // Reinitialize the selections, the selection menus and the actual data
     // each time a new patient is selected
+    console.log(e)
 
     this.reading_select = undefined
     this.laterality_select = undefined
@@ -247,8 +250,10 @@ export class GraphComponent implements OnInit {
     if(this.patient_select != undefined){
 
       // Get the data from the selected patient
+      this.patients[this.patient_select].viewValue
+
       this.readings_of_patient_sub = this.getReadingsOfPatient(this.patients[this.patient_select].viewValue).subscribe(data => {
-        
+                
         // Set the data to the received from the http method
         this.readings_data = data
 
@@ -325,11 +330,11 @@ export class GraphComponent implements OnInit {
     runButton!.style.display = "inline-block"
     csvButton!.style.display = "inline-block"
     /* sp22; 
-      We follow the existng logic of the application, and make the csv button available after all three selections are made.
+      We follow the existing logic of the application, and make the csv button available after all three selections are made.
       We need this method to make the selection values persist after graphData() is called because it wipes all the selections before returning.
       Future reccomendations are refactor code to allow selection values to persist through graphing
     */
-    if (this.reading_select != undefined && this.patient_select != undefined && this.laterality_select != undefined){
+    if (this.reading_select != undefined && this.patient_select != undefined && this.laterality_select != undefined) {
       this.setcsvData(this.readings_data[this.reading_select].id, this.patients[this.patient_select].viewValue, this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select])
     }
     
@@ -432,7 +437,7 @@ export class GraphComponent implements OnInit {
     Please visit https://www.npmjs.com/package/ngx-csv for details of this library.
     about this package. 
     */
-    // setting options for the CVS file
+    // setting options for the CSV file
     var options = { 
       fieldSeparator: ',',
       quoteStrings: '"',
@@ -488,7 +493,11 @@ export class GraphComponent implements OnInit {
     return this.readingService.getAll()
   }
 
-  getReadings(patient: string):  Observable<Reading[]>{
+  getReading(reading_id: number): Observable<Reading> {
+    return this.readingService.getById(reading_id)
+  }
+
+  getReadings(patient: string): Observable<Reading[]>{
     return this.readingService.getByString(patient)
   }
 
@@ -508,4 +517,65 @@ export class GraphComponent implements OnInit {
     return this.csvDataService.getMetaDataForCSV(id, patient_no)
   }
 
+  //Sets all fields using routed parameters
+  setInit() {
+    // Get the reading select element from the web page
+    var readingSelect = document.getElementById("reading-select-field")
+
+    // If the display is not showing, make sure to show it
+    if (readingSelect?.style.display != "inline-block") {
+      readingSelect!.style.display = "inline-block"
+    }
+
+    //Get patient value from input params
+    this.getReading(this.routed_id!).subscribe(readingData => {
+      this.patient_select = this.patients_data.findIndex(x => x == readingData.patient_num)
+      console.log("Patient: " + this.patient_select)
+      this.readings_of_patient_sub = this.getReadingsOfPatient(readingData.patient_num!).subscribe(readingsData => {
+        // Set the data to the received from the http method
+        this.readings_data = readingsData
+
+        // Loop through the data and put it into the reading selection menu in reverse order so the most recent reading it at the top
+        for (let i = 0; i < readingsData.length; i++) {
+          this.readings[(readingsData.length - 1) - i] = { value: i, viewValue: "ID: " + readingsData[i].id + " Date Created: " + readingsData[i].date_created }
+        }
+        // Get the reading select element from the web page
+        var lateralitySelect = document.getElementById("laterality-select-field")
+
+        // If the display is not showing, make sure to show it
+        if (lateralitySelect?.style.display != "inline-block") {
+          lateralitySelect!.style.display = "inline-block"
+        }
+
+        //Set reading value to input param
+        this.reading_select = this.readings_data.findIndex(x => x.id == this.routed_id)
+
+        // Get the laterality from a reading
+        let laterality = this.routed_laterality        
+
+        // Check if the laterality is bilateral
+        if (laterality == "BILATERAL") {
+          this.laterality_select = 2
+          // If it is, set the lateralities selection menu to all 3
+          this.lateralites[0] = { value: 0, viewValue: "LEFT_ARM" }
+          this.lateralites[1] = { value: 1, viewValue: "RIGHT_ARM" }
+          this.lateralites[2] = { value: 2, viewValue: "BILATERAL" }
+
+          // Set the actual data as well
+          this.lateralites_data[0] = "LEFT_ARM"
+          this.lateralites_data[1] = "RIGHT_ARM"
+          this.lateralites_data[2] = "BILATERAL"
+        }
+        // Laterality not bilateral
+        else {
+          // Just set the data to the selected laterality
+          this.laterality_select = 0
+          this.lateralites[0] = { value: 0, viewValue: laterality }
+          this.lateralites_data[0] = laterality!
+        }
+
+        this.toggleButton(null);
+      })
+    })
+  }
 }
