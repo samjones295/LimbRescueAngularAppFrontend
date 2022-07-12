@@ -25,7 +25,6 @@ export class GraphComponent implements OnInit {
   readings_data = [] as Reading[]
   patients_data = [] as string[]
   lateralites_data = [] as string[]
-  derivatives_data=0 as number
 
   // Define variables to hold the index of the selection from the dropdown
   patient_select!: number | undefined
@@ -135,13 +134,8 @@ export class GraphComponent implements OnInit {
             
       // If the laterality given from the query parameters isn't BILATERAL
       if(this.routed_laterality != "BILATERAL"){
-
-        //THIS NEEDS FIXED
-        //THIS NEEDS FIXED
-        //THIS NEEDS FIXED
-        
         // Get the reading data from a single arm using the routed parameters
-        this.reading_data_sub = this.getReadingData(this.routed_id, this.routed_laterality,this.derivative_select).subscribe(data => {
+        this.reading_data_sub = this.getReadingData(this.routed_id, this.routed_laterality,0).subscribe(data => {
 
           // Go through all the data and create graph data points 
           for(let i = 0; i<data.length; i++){
@@ -158,7 +152,7 @@ export class GraphComponent implements OnInit {
       else{
 
         // First get the reading data from the LEFT_ARM
-        this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM",this.derivative_select).subscribe(data => {
+        this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM",0).subscribe(data => {
 
           // Go through all the data and create graph data points
           for(let i = 0; i<data.length; i++){
@@ -171,7 +165,7 @@ export class GraphComponent implements OnInit {
         })
 
         // Next get the reading data from the RIGHT_ARM
-        this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM",this.derivative_select).subscribe(data => {
+        this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM",0).subscribe(data => {
           
           // Go through all the data and create graph data points
           for(let i = 0; i<data.length; i++){
@@ -348,16 +342,6 @@ export class GraphComponent implements OnInit {
       }
     }
   }
-  
-  
-
-
-
-
-
-
-
-
 
   // Called after all three selections are made
   toggleButton(e: any){
@@ -371,10 +355,6 @@ export class GraphComponent implements OnInit {
       We need this method to make the selection values persist after graphData() is called because it wipes all the selections before returning.
       Future reccomendations are refactor code to allow selection values to persist through graphing
     */
-    
-        //THIS NEEDS FIXED
-        //THIS NEEDS FIXED
-        //THIS NEEDS FIXED
     if (this.reading_select != undefined && this.patient_select != undefined && this.laterality_select != undefined) {
       this.setcsvData(this.readings_data[this.reading_select].id, this.patients[this.patient_select].viewValue, this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select])
     }
@@ -399,9 +379,6 @@ export class GraphComponent implements OnInit {
       if(this.lateralites_data[this.laterality_select] != "BILATERAL"){
 
         // Get the reading data from the selected reading with the seelected laterality
-        //THIS NEEDS FIXED
-        //THIS NEEDS FIXED
-        //THIS NEEDS FIXED
         this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select],this.derivative_select).subscribe(data => {
          
           // Create graph points for all the data
@@ -457,7 +434,6 @@ export class GraphComponent implements OnInit {
       
       this.readings_data = []
       this.lateralites_data = [] 
-      this.derivatives_data=0
     }
   }
 
