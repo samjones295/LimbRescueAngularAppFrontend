@@ -22,7 +22,7 @@ export class ReadingDataService {
   }
 
   getByReadingIdAndLaterality(reading_id: number, laterality: string, derivative: number){
-    return this.http.get<ReadingData[]>(baseUrl+"/data?reading_id="+reading_id+"&laterality="+laterality+"?derivative="+derivative)
+    return this.http.get<ReadingData[]>(baseUrl+"/data?reading_id="+reading_id+"&laterality="+laterality+"&derivative="+derivative)
   }
 
 }
