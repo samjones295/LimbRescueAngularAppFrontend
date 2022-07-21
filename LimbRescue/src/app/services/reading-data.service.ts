@@ -21,8 +21,8 @@ export class ReadingDataService {
     return this.http.get<ReadingData>(baseUrl+'/data/'+id)
   }
 
-  getByReadingIdAndLaterality(reading_id: number, laterality: string){
-    return this.http.get<ReadingData[]>(baseUrl+"/data?reading_id="+reading_id+"&laterality="+laterality)
+  getByReadingIdAndLaterality(reading_id: number, laterality: string, derivative: number){
+    return this.http.get<ReadingData[]>(baseUrl+"/data?reading_id="+reading_id+"&laterality="+laterality+"&derivative="+derivative)
   }
 
 }

@@ -19,6 +19,7 @@ export class GraphComponent implements OnInit {
   readings = [] as any
   patients = [] as any
   lateralites = [] as any
+  derivatives=[0,1,2] as any
 
   // Define a variable to hold the actual data received
   readings_data = [] as Reading[]
@@ -29,7 +30,8 @@ export class GraphComponent implements OnInit {
   patient_select!: number | undefined
   reading_select!: number | undefined
   laterality_select!: number | undefined
-
+  derivative_select!:number
+  
   // Define variables for subscriptions
   query_params_sub: any;
   reading_data_sub: any;
@@ -132,9 +134,8 @@ export class GraphComponent implements OnInit {
             
       // If the laterality given from the query parameters isn't BILATERAL
       if(this.routed_laterality != "BILATERAL"){
-
         // Get the reading data from a single arm using the routed parameters
-        this.reading_data_sub = this.getReadingData(this.routed_id, this.routed_laterality).subscribe(data => {
+        this.reading_data_sub = this.getReadingData(this.routed_id, this.routed_laterality,0).subscribe(data => {
 
           // Go through all the data and create graph data points 
           for(let i = 0; i<data.length; i++){
@@ -151,7 +152,7 @@ export class GraphComponent implements OnInit {
       else{
 
         // First get the reading data from the LEFT_ARM
-        this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
+        this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM",0).subscribe(data => {
 
           // Go through all the data and create graph data points
           for(let i = 0; i<data.length; i++){
@@ -164,7 +165,7 @@ export class GraphComponent implements OnInit {
         })
 
         // Next get the reading data from the RIGHT_ARM
-        this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
+        this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM",0).subscribe(data => {
           
           // Go through all the data and create graph data points
           for(let i = 0; i<data.length; i++){
@@ -198,7 +199,11 @@ export class GraphComponent implements OnInit {
         cnt++
       }
     })
-
+    
+    this.derivatives[0] = { value: 0, viewValue: "0" }
+    this.derivatives[1] = { value: 1, viewValue: "1" }
+    this.derivatives[2] = { value: 2, viewValue: "2" }
+    this.derivative_select=0;
     this.setInit();
   }
 
@@ -266,6 +271,22 @@ export class GraphComponent implements OnInit {
   }
 
   // This method is called after selecting a reading from the reading selections
+  toggleSelectDerivatives(e: any){
+
+    // Get the reading select element from the web page
+    var derivativeSelect = document.getElementById("derivative-select-field")
+
+    // If the display is not showing, make sure to show it
+    if(derivativeSelect?.style.display != "inline-block"){
+      derivativeSelect!.style.display = "inline-block"
+    }
+    
+    this.derivatives[0] = { value: 0, viewValue: "0" }
+    this.derivatives[1] = { value: 1, viewValue: "1" }
+    this.derivatives[2] = { value: 2, viewValue: "2" }
+  }
+  
+    // This method is called after selecting a reading from the reading selections
   toggleSelectLaterality(e: any){
 
     // Reinitialize the selections, the selection menus and the actual data
@@ -358,7 +379,7 @@ export class GraphComponent implements OnInit {
       if(this.lateralites_data[this.laterality_select] != "BILATERAL"){
 
         // Get the reading data from the selected reading with the seelected laterality
-        this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select]).subscribe(data => {
+        this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select],this.derivative_select).subscribe(data => {
          
           // Create graph points for all the data
           for(let i = 0; i<data.length; i++){
@@ -372,7 +393,7 @@ export class GraphComponent implements OnInit {
       // If the laterality is bilateral
       else{
         // First get the reading data from the left arm
-        this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
+        this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM",this.derivative_select).subscribe(data => {
           
           // Accumulate all the data for the left arm
           for(let i = 0; i<data.length; i++){
@@ -382,7 +403,7 @@ export class GraphComponent implements OnInit {
           this.scatterChartData[0].data = graph_data
         })
         // Next get the reading data from the right arm
-        this.reading_data_sub_bilateral = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM").subscribe(data => {
+        this.reading_data_sub_bilateral = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM",this.derivative_select).subscribe(data => {
           // Accumulate all the data for the right arm
           for(let i = 0; i<data.length; i++){
             graph_data_bilateral[i] = {x: data[i].record_time, y: data[i].ppg_val }
@@ -399,14 +420,18 @@ export class GraphComponent implements OnInit {
 
       var lateralitySelect = document.getElementById("laterality-select-field")
       lateralitySelect!.style.display = "none"
+      
+      var derivativeSelect = document.getElementById("derivative-select-field")
+      derivativeSelect!.style.display = "none"
 
       this.patient_select = undefined
       this.reading_select = undefined
       this.laterality_select = undefined
-
+      this.derivative_select=0
+      
       this.readings = []
       this.lateralites = []
-    
+      
       this.readings_data = []
       this.lateralites_data = [] 
     }
@@ -447,7 +472,7 @@ export class GraphComponent implements OnInit {
       title: "default_title",
       useBom: true,
       noDownload: false,
-      headers: ["ppg", "time", "laterality"]
+      headers: ["ppg", "derivative","time", "laterality"]
     };
     
     // name of the csv file when downloaded
@@ -505,8 +530,8 @@ export class GraphComponent implements OnInit {
     return this.readingService.getAllOfPatient(patient)
   }
 
-  getReadingData(reading_id: number, laterality: string){
-    return this.readingDataService.getByReadingIdAndLaterality(reading_id, laterality)
+  getReadingData(reading_id: number, laterality: string, derivative: number){
+    return this.readingDataService.getByReadingIdAndLaterality(reading_id, laterality,derivative)
   }
 
   getCsvData(reading_id: number, laterality: string){
