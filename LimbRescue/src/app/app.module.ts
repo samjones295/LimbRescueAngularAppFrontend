@@ -25,7 +25,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HomeComponent, UpdateReadingDialog, CreateGroupFromReadingsDialog, MY_DATE_FORMATS } from './components/home/home.component';
+import { HomeComponent, DeleteReadingDialog, UpdateReadingDialog, CreateGroupFromReadingsDialog, MY_DATE_FORMATS } from './components/home/home.component';
 import { GraphComponent } from './components/graph/graph.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuthGuardService } from './components/login/auth-guard.service';
@@ -41,6 +41,7 @@ import { GroupsComponent } from './components/groups/groups.component';
     AppComponent,
     HomeComponent,
     UpdateReadingDialog,
+    DeleteReadingDialog,
     CreateGroupFromReadingsDialog,
     GraphComponent,
     LoginComponent,
