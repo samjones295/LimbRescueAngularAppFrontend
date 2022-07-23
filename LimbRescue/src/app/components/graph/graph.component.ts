@@ -43,9 +43,8 @@ export class GraphComponent implements OnInit {
   routed_laterality: string | undefined
 
   // SU22: Derivative Selection Variables;
-  derivaties: any[] = [];
-  derivative_data: any[] = [];
-  derivative_select!: number | undefined;
+  derivativeOptions: any[] = [];
+  derivativeSelection: number | undefined;
 
   // All of the options for a the chart on the graph page.
   // Please check chart.js documentation for more information
@@ -95,21 +94,23 @@ export class GraphComponent implements OnInit {
   public scatterChartData: ChartDataSets[] = [
     {
       data: [],
-      label: "",
+      label: "N/A",
       borderColor: 'red',
       pointRadius: 3,
       pointBackgroundColor: 'black',
       showLine: true,
-      fill: false
+      fill: false,
+      hidden: false
     },
     {
       data: [],
       borderColor: 'blue',
-      label: "",
+      label: "Right Arm",
       pointRadius: 3,
       pointBackgroundColor: 'black',
       showLine: true,
-      fill: false
+      fill: false,
+      hidden: false
     },
     // First Derivative.
     {
@@ -119,7 +120,8 @@ export class GraphComponent implements OnInit {
       pointRadius: 3,
       pointBackgroundColor: 'black',
       showLine: true,
-      fill: false
+      fill: false,
+      hidden: false
     },
     // Second Derivative.
     {
@@ -129,7 +131,8 @@ export class GraphComponent implements OnInit {
       pointRadius: 3,
       pointBackgroundColor: 'black',
       showLine: true,
-      fill: false
+      fill: false,
+      hidden: false
     },
   ];
 
@@ -153,28 +156,18 @@ export class GraphComponent implements OnInit {
     if(this.routed_id != undefined && this.routed_laterality != undefined){
 
       // Initialize some necesary graph variables
-      // SU22
-        let leftArmGraphData: ChartPoint[] = [];
-        let rightArmGraphData: ChartPoint[] = [];
-        let firstDerivGraphData: ChartPoint[] = [];
-        let secondDerivGraphData: ChartPoint[] = [];
+
+      // Ensure the derivative selection is loaded (SU22).
+      this.toggleDerivativeSelect();
+      this.derivativeSelection = 0;
             
       // If the laterality given from the query parameters isn't BILATERAL
-      console.log("ShepDebug");
-      console.log(this.routed_laterality != "BILATERAL");
       if(this.routed_laterality != "BILATERAL"){
 
         // Get the reading data from a single arm using the routed parameters
         this.reading_data_sub = this.getReadingData(this.routed_id, this.routed_laterality).subscribe(data => {
-
-          // Go through all the data and create graph data points 
-          for(let i = 0; i<data.length; i++){
-            leftArmGraphData[i] = {x: data[i].record_time, y: data[i].ppg_val }
-          }
-
-          // Set the chart data to the data from the accumulated points
-          this.scatterChartData[0].data = leftArmGraphData;
-          this.scatterChartData[0].label = "Bi-Laterial";
+          this.assignBilateralData(data);
+          this.assignDerivativeData(data);
         })
       }
 
@@ -183,53 +176,15 @@ export class GraphComponent implements OnInit {
 
         // First get the reading data from the LEFT_ARM
         this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
-
-          for(let i: number = 0; i < data.length; i++){
-            let dataPoint: any = { x: data[i].record_time, y: data[i].ppg_val };
-            let derivativeVal: number | undefined = data[i].derivative;
-            if(derivativeVal == 0 && data[i].laterality === "LEFT_ARM"){
-              leftArmGraphData[i] = dataPoint;
-            } else if(derivativeVal == 1){
-              firstDerivGraphData[i] = dataPoint;
-            } else if(derivativeVal == 2){
-              secondDerivGraphData[i] = dataPoint;
-            }
-          }
-
-          // Set the chart data to the data from the accumulated points
-          this.scatterChartData[0].data = leftArmGraphData;
-          this.scatterChartData[0].label = "Left Arm";
-          // Set Derivative Data.
-          this.scatterChartData[2].data = firstDerivGraphData;
-          this.scatterChartData[3].data = secondDerivGraphData;
+          this.assignLeftArmData(data);
+          this.assignDerivativeData(data);
         })
 
         // Next get the reading data from the RIGHT_ARM
         this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
-
-          // Go through all the data and create graph data points
-          for(let i: number = 0; i < data.length; i++){
-            let dataPoint: any = { x: data[i].record_time, y: data[i].ppg_val };
-            let derivativeVal: number | undefined = data[i].derivative;
-            if(derivativeVal == 0 && data[i].laterality === "RIGHT_ARM"){
-              rightArmGraphData[i] = dataPoint;
-            } else if(derivativeVal == 1){
-              firstDerivGraphData[i] = dataPoint;
-            } else if(derivativeVal == 2){
-              secondDerivGraphData[i] = dataPoint;
-            }
-          }
-          // Set the chart data to the data from the accumulated points
-          this.scatterChartData[1].data = rightArmGraphData;
-          this.scatterChartData[1].label = "Right Arm";
-          // Set Derivative Data.
-          this.scatterChartData[2].data = firstDerivGraphData;
-          this.scatterChartData[3].data = secondDerivGraphData;
+          this.assignRightArmData(data);
+          this.assignDerivativeData(data);
         })
-
-        for(let i = 0; i < this.scatterChartData.length; i++){
-          console.log(this.scatterChartData[i].data);
-        }
       }
     }
 
@@ -254,6 +209,72 @@ export class GraphComponent implements OnInit {
     })
 
     this.setInit();
+  }
+
+  /**
+   * This helper function assigns the data collected from the backend to the
+   * bilaterial graph.
+   * 
+   * @param data
+  **/
+  assignBilateralData(data: ReadingData[]){
+    this.scatterChartData[0].data = [];
+    let bilatGraphData: ChartPoint[] = [];
+    for(let i: number = 0; i < data.length; i++){
+      let dataPoint = { x: data[i].record_time, y: data[i].ppg_val };
+      bilatGraphData[i] = dataPoint;
+    }
+
+    this.scatterChartData[0].data = bilatGraphData;
+    this.scatterChartData[0].label = "Bi-Laterial";
+  }
+
+  // Same as above for left arm.
+  assignLeftArmData(data: ReadingData[]){
+    this.scatterChartData[0].data = [];
+    let leftArmGraphData: ChartPoint[] = [];
+    for(let i: number = 0; i < data.length; i++){
+      let dataPoint = { x: data[i].record_time, y: data[i].ppg_val };
+      if(data[i].laterality === "LEFT_ARM" && data[i].derivative === 0){
+        leftArmGraphData[i] = dataPoint;
+      }
+    }
+
+    this.scatterChartData[0].data = leftArmGraphData;
+    this.scatterChartData[0].label = "Left Arm";
+  }
+
+  // Same as above for right arm.
+  assignRightArmData(data: ReadingData[]){
+    this.scatterChartData[1].data = [];
+    let rightArmGraphData: ChartPoint[] = [];
+    for(let i: number = 0; i < data.length; i++){
+      let dataPoint = { x: data[i].record_time, y: data[i].ppg_val };
+      if(data[i].laterality === "RIGHT_ARM" && data[i].derivative === 0){
+        rightArmGraphData[i] = dataPoint;
+      }
+    }
+
+    this.scatterChartData[1].data = rightArmGraphData;
+    this.scatterChartData[1].label = "Right Arm";
+  }
+
+  // Same as above for derivative values.
+  assignDerivativeData(data: ReadingData[]){
+    this.scatterChartData[2].data = [];
+    this.scatterChartData[3].data = [];
+    let firstDerivGraphData: ChartPoint[] = [];
+    let secondDerivGraphData: ChartPoint[] = [];
+    for(let i: number = 0; i < data.length; i++){
+      let dataPoint = { x: data[i].record_time, y: data[i].ppg_val };
+      if(data[i].derivative === 1){
+        firstDerivGraphData[i] = dataPoint;
+      } else if(data[i].derivative === 2){
+        secondDerivGraphData[i] = dataPoint;
+      }
+    }
+    this.scatterChartData[2].data = firstDerivGraphData;
+    this.scatterChartData[3].data = secondDerivGraphData;
   }
 
   // This method is called when navigating away from the Graph page
@@ -281,7 +302,6 @@ export class GraphComponent implements OnInit {
 
     // Reinitialize the selections, the selection menus and the actual data
     // each time a new patient is selected
-    console.log(e)
 
     this.reading_select = undefined
     this.laterality_select = undefined
@@ -384,58 +404,51 @@ export class GraphComponent implements OnInit {
    * I also hope this works as a good template for writing 
    * "good" TypeScript.
   **/
-  toggleDerivativeSelect(e: any){
+  toggleDerivativeSelect(){
     // Reinit the selection.
-    this.derivaties = [];
-    this.derivative_data = [];
-    this.derivative_select = undefined;
+    this.derivativeSelection = undefined;
 
     // Get the reference to the DOM element needed
     let derivSelectElement: HTMLElement | null = document.getElementById('derivative-select-field');
 
-    if(derivSelectElement?.style.display !== 'inline-block'){
+    if(derivSelectElement?.style.display !== 'inline-block' || this.laterality_select != undefined){
       derivSelectElement!.style.display = 'inline-block';
     }
 
-    // Set reading id to the selected reading if not done already.
-    if(this.reading_select != undefined){
-      this.routed_id = this.readings_data[this.reading_select].id;
+    this.derivativeSelection = 0;
+    this.derivativeOptions[0] = { value: 0, viewValue: "All Data" };
+    this.derivativeOptions[1] = { value: 1, viewValue: "Raw Data" };
+    this.derivativeOptions[2] = { value: 2, viewValue: "1st Derivative" }; 
+    this.derivativeOptions[3] = { value: 3, viewValue: "2nd Derivative" }; 
+  }
+
+  /**
+   * This method listens for when the derivative selection is made, and changes
+   * the currently displayed graphs based on the selection.
+  **/
+  toggleGraphs(e: any){
+    // leftArm/bilaterial, rightArm, firstDerivative, secondDerivative.
+    let visibilityTracker: boolean[] = [];
+    if(e.value == 0){ // Display All.
+      visibilityTracker = [false, false, false, false];
+    } else if(e.value == 1){ // Display Raw Data Only.
+      visibilityTracker = [false, false, true, true];
+    } else if (e.value == 2){ // Display First Derivative Only.
+      visibilityTracker = [true, true, false, true];
+    } else if (e.value == 3){ // Display Second Derivative Only.
+      visibilityTracker = [true, true, true, false];
+    }
+    
+    for(let i: number = 0; i <= 3; i++){
+      this.scatterChartData[i].hidden = visibilityTracker[i];
     }
 
-    // If a patient is selected
-    if(this.patient_select != undefined){
-
-      // Get the reading data to use for laterality selction
-      this.readings_of_patient_sub = this.getReadingsOfPatient(this.patients[this.patient_select].viewValue).subscribe(data => {
-
-        // Get the laterality from a reading 
-        let laterality = this.readings_data[this.reading_select!];
-
-        // Check if the laterality is bilateral
-        // if(laterality == "BILATERAL"){
-        //   // If it is, set the lateralities selection menu to all 3
-        //   this.lateralites[0] = { value: 0, viewValue: "LEFT_ARM"}
-        //   this.lateralites[1] = { value: 1, viewValue: "RIGHT_ARM"}
-        //   this.lateralites[2] = { value: 2, viewValue: "BILATERAL"}
-
-        //   // Set the actual data as well
-        //   this.lateralites_data[0] = "LEFT_ARM"
-        //   this.lateralites_data[1] = "RIGHT_ARM"
-        //   this.lateralites_data[2] = "BILATERAL"
-        // }
-        // // Laterality not bilateral
-        // else{
-        //   // Just set the data to the selected laterality
-        //   this.lateralites[0] = { value: 0, viewValue: laterality}
-        //   this.lateralites_data[0] = laterality!
-        // }
-      })
-    }
-
+    // Toggle Button.
+    this.toggleButton();
   }
 
   // Called after all three selections are made
-  toggleButton(e: any){
+  toggleButton(){
     // Show the run button
     var runButton = document.getElementById("run-button")
     var csvButton = document.getElementById("csv-button")
@@ -455,52 +468,39 @@ export class GraphComponent implements OnInit {
   // Called when the graph button is called
   graphData(){
     // clear the existing scatter chart data if there is any (to account for going from a biltateral to unilateral reading)
-    this.scatterChartData[0].data = []
-    this.scatterChartData[1].data = []
+    for(let i: number = 0; i < this.scatterChartData.length; i++){
+      this.scatterChartData[i].data = [];
+    }
+
     // Initialize variables for the graph
     let graph_data = [] as ChartPoint[]
     let graph_data_bilateral = [] as ChartPoint[]
 
     // If selections are made for reading and laterality
     if(this.reading_select != undefined && this.laterality_select != undefined){
-      console.log("READING SELECT: ")
-      console.log(this.readings_data[this.reading_select])
+      //console.log("READING SELECT: ")
+      //console.log(this.readings_data[this.reading_select])
 
       // If the selected laterality is not BILATERAL
       if(this.lateralites_data[this.laterality_select] != "BILATERAL"){
 
         // Get the reading data from the selected reading with the seelected laterality
         this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select]).subscribe(data => {
-         
-          // Create graph points for all the data
-          for(let i = 0; i<data.length; i++){
-            graph_data[i] = {x: data[i].record_time, y: data[i].ppg_val }
-
-          }
-          // Set all the graph data to the accumulated points
-          this.scatterChartData[0].data = graph_data
+          this.assignBilateralData(data);
+          this.assignDerivativeData(data);
         })
       }
       // If the laterality is bilateral
       else{
         // First get the reading data from the left arm
         this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
-          
-          // Accumulate all the data for the left arm
-          for(let i = 0; i<data.length; i++){
-            graph_data[i] = {x: data[i].record_time, y: data[i].ppg_val }
-          }
-          // Set all the graph data to the accumulated points
-          this.scatterChartData[0].data = graph_data
+          this.assignLeftArmData(data);
+          this.assignDerivativeData(data);
         })
         // Next get the reading data from the right arm
         this.reading_data_sub_bilateral = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM").subscribe(data => {
-          // Accumulate all the data for the right arm
-          for(let i = 0; i<data.length; i++){
-            graph_data_bilateral[i] = {x: data[i].record_time, y: data[i].ppg_val }
-          }
-          // Set all the graph data to the accumulated points
-          this.scatterChartData[1].data = graph_data_bilateral
+          this.assignRightArmData(data);
+          this.assignDerivativeData(data);
         })
       }
 
@@ -686,7 +686,7 @@ export class GraphComponent implements OnInit {
           this.lateralites_data[0] = laterality!
         }
 
-        this.toggleButton(null);
+        this.toggleButton();
       })
     })
   }

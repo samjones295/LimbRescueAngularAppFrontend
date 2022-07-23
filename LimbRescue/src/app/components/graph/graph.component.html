@@ -19,7 +19,7 @@
         </mat-form-field>
         <mat-form-field id="laterality-select-field" appearance="fill" style="display: none;">
             <mat-label>Select Laterality</mat-label>
-            <mat-select (selectionChange)="toggleButton($event)" [(ngModel)]="laterality_select" name="laterality">
+            <mat-select (selectionChange)="toggleDerivativeSelect()" [(ngModel)]="laterality_select" name="laterality">
                 <mat-option *ngFor="let laterality of lateralites" [value]="laterality.value">
                     {{laterality.viewValue}}
                 </mat-option>
@@ -27,13 +27,12 @@
         </mat-form-field>
 
         <!-- Derivative Field Selector -->
-        <mat-form-field id="derivative-select-field" appearance="fill" style="display: inline-block;">
+        <mat-form-field id="derivative-select-field" appearance="fill" style="display: none;">
             <mat-label>Select Derivative</mat-label>
-            <mat-select (selectionChange)="toggleButton($event)" [(ngModel)]="derivative_select" name="laterality">
-                <!-- <mat-option *ngFor="let laterality of lateralites" [value]="derivative.value">
-                    {{derivative.viewValue}} 
-                    Hello World!
-                </mat-option> -->
+            <mat-select (selectionChange)="toggleGraphs($event)" [(ngModel)]="derivativeSelection" name="derivative">
+                <mat-option *ngFor="let options of derivativeOptions" [value]="options.value">
+                    {{options.viewValue}} 
+                </mat-option>
             </mat-select>
         </mat-form-field>
         <!-- Derivative Field Selector End -->
@@ -51,7 +50,7 @@
     </div>
     <div style="display: block;" >
         <div class="chart-wrapper">
-            <canvas baseChart
+            <canvas baseChart id="resultsChart"
                 [datasets]="scatterChartData"
                 [options]="scatterChartOptions"
                 [chartType]="scatterChartType">
