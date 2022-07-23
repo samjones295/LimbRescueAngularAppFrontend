@@ -25,6 +25,19 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
+
+        <!-- Derivative Field Selector -->
+        <mat-form-field id="derivative-select-field" appearance="fill" style="display: inline-block;">
+            <mat-label>Select Derivative</mat-label>
+            <mat-select (selectionChange)="toggleButton($event)" [(ngModel)]="derivative_select" name="laterality">
+                <!-- <mat-option *ngFor="let laterality of lateralites" [value]="derivative.value">
+                    {{derivative.viewValue}} 
+                    Hello World!
+                </mat-option> -->
+            </mat-select>
+        </mat-form-field>
+        <!-- Derivative Field Selector End -->
+
         <div style="text-align: center;padding-bottom: 1%;">
             <button mat-raised-button color="primary" id="run-button" style= "display: none;" (click)="graphData()">View Graph</button>
             
