@@ -159,7 +159,7 @@ export class GraphComponent implements OnInit {
 
       // Ensure the derivative selection is loaded (SU22).
       this.toggleDerivativeSelect();
-      this.derivativeSelection = 0;
+      //this.derivativeSelection = 0;
             
       // If the laterality given from the query parameters isn't BILATERAL
       if(this.routed_laterality != "BILATERAL"){
@@ -218,11 +218,17 @@ export class GraphComponent implements OnInit {
    * @param data
   **/
   assignBilateralData(data: ReadingData[]){
-    this.scatterChartData[0].data = [];
+    let n: number = this.scatterChartData.length;
+    for(let i: number = 0; i < n; i++){
+      this.scatterChartData[i].data = [];
+    }
+
     let bilatGraphData: ChartPoint[] = [];
     for(let i: number = 0; i < data.length; i++){
-      let dataPoint = { x: data[i].record_time, y: data[i].ppg_val };
-      bilatGraphData[i] = dataPoint;
+      if(data[i].derivative === 0){
+        let dataPoint = { x: data[i].record_time, y: data[i].ppg_val };
+        bilatGraphData[i] = dataPoint;
+      }
     }
 
     this.scatterChartData[0].data = bilatGraphData;
