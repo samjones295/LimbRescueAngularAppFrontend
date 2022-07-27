@@ -139,30 +139,29 @@ export class GraphComponent implements OnInit {
       this.toggleDerivativeSelect();
       //this.derivativeSelection = 0;
             
-      // If the laterality given from the query parameters isn't BILATERAL
       if(this.routed_laterality == "BILATERAL"){
-
-        // Get the reading data from a single arm using the routed parameters
-        this.reading_data_sub = this.getReadingData(this.routed_id, this.routed_laterality).subscribe(data => {
-          this.assignLeftArmData(data,0);
-          this.assignRightArmData(data,0);
-        })
-      }
-
-      // If the laterality is given from the query parameters as BILATERAL
-      else{
-
-        // First get the reading data from the LEFT_ARM
-        if(this.routed_laterality="LEFT_ARM"){
+        // First get the reading data from the left arm
         this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
-          this.assignLeftArmData(data,0);
+          this.assignLeftArmData(data,this.derivativeSelection!);
         })
-	}else{
-        // Next get the reading data from the RIGHT_ARM
-        this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
-          this.assignRightArmData(data,0);
+          this.reading_data_sub = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
+          this.assignRightArmData(data,this.derivativeSelection!);     
         })
       }
+      // If the laterality is left or right
+      else{
+      	 if(this.routed_laterality == "LEFT_ARM"){
+        // First get the reading data from the left arm
+        this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
+          this.assignLeftArmData(data,this.derivativeSelection!);
+        })
+        }else{
+        
+          this.reading_data_sub = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
+          this.assignRightArmData(data,this.derivativeSelection!);
+        })
+        
+        }
       }
     }
 
