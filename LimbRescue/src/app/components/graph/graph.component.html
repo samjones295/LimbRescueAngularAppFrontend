@@ -29,7 +29,7 @@
         <!-- Derivative Field Selector -->
         <mat-form-field id="derivative-select-field" appearance="fill" style="display: none;">
             <mat-label>Select Derivative</mat-label>
-            <mat-select (selectionChange)="toggleGraphs($event)" [(ngModel)]="derivativeSelection" name="derivative">
+            <mat-select [(ngModel)]="derivativeSelection" name="derivative">
                 <mat-option *ngFor="let options of derivativeOptions" [value]="options.value">
                     {{options.viewValue}} 
                 </mat-option>
