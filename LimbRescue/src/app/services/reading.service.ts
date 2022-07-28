@@ -38,6 +38,10 @@ export class ReadingService {
     return this.http.put(baseUrl+'/reading/'+id, body, {observe: 'response'})
   }
 
+  deleteReading(id: number){
+    return this.http.delete(baseUrl+"/reading/" + id);
+  }
+  
   getDateAndtime(delta: number): Observable<String>{
     return this.http.get<String>(baseUrl+'/start?delta='+delta)
   }

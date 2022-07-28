@@ -56,7 +56,7 @@ export class HomeComponent implements AfterViewInit {
   timer_sub: any;
 
   // Columns to be displayedint the home table
-  displayedColumns: string[] = ['select', 'editor', 'patient number', 'date', 'laterality', 'show graph', 'comments'];
+  displayedColumns: string[] = ['select', 'editor', 'delete' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
   selection_subject = new SelectionModel<Reading>(true, []);
 
@@ -153,6 +153,23 @@ export class HomeComponent implements AfterViewInit {
         }
       )
     })
+  }
+
+  deleteReading(id: number){
+    console.log(id);
+    const dialogRef = this.dialog.open(DeleteReadingDialog, {
+        data: id,
+        disableClose: true,
+        autoFocus: true,
+        width: '400px',
+    });
+    this.update_dialog_ref_sub = dialogRef.afterClosed().subscribe(output_data => {
+        if(output_data != undefined){
+            this.readingService.deleteReading(id).subscribe(result => {
+                console.log(result);
+            });
+        }
+    });
   }
 
   // Used to create a group
@@ -338,6 +355,35 @@ export class UpdateReadingDialog {
 
   save() {
     this.dialogRef.close(this.form.value);
+  }
+
+  close() {
+    this.dialogRef.close();
+  }
+}
+
+///////////////////////////////////////////////
+////         DELETE Reading Dialog         ////
+///////////////////////////////////////////////
+
+@Component({
+  selector: 'delete-reading-dialog',
+  templateUrl: 'delete-reading-dialog.html',
+  styleUrls: ['./home.component.sass'],
+})
+
+export class DeleteReadingDialog {
+  id: number
+
+  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<UpdateReadingDialog>, @Inject(MAT_DIALOG_DATA) public data: number) {
+    this.id = data
+  }
+
+  ngOnInit() {
+  }
+
+  save() {
+    this.dialogRef.close(true);
   }
 
   close() {
