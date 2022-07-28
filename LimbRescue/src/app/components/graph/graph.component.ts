@@ -484,7 +484,7 @@ export class GraphComponent implements OnInit {
       title: "default_title",
       useBom: true,
       noDownload: false,
-      headers: ["ppg", "time", "laterality"]
+      headers: ["Average for reading","ppg","derivative", "time", "laterality"]
     };
     
     // name of the csv file when downloaded
