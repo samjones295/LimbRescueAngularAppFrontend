@@ -41,6 +41,9 @@ export class GraphComponent implements OnInit {
   routed_id: number | undefined
   routed_laterality: string | undefined
 
+  // Define variable to determine if bilateral data should be normalized
+  normalized: boolean = false;
+
   // All of the options for a the chart on the graph page.
   // Please check chart.js documentation for more information
   public scatterChartOptions: ChartOptions = {
@@ -130,6 +133,8 @@ export class GraphComponent implements OnInit {
 
       // If the laterality given from the query parameters isn't BILATERAL
       if(this.routed_laterality != "BILATERAL"){
+        //Disable normalization
+        document.getElementById("normalize-button")!.style.display = "none";
 
         // Get the reading data from a single arm using the routed parameters
         this.reading_data_sub = this.getReadingData(this.routed_id, this.routed_laterality).subscribe(data => {
@@ -146,30 +151,72 @@ export class GraphComponent implements OnInit {
 
       // If the laterality is given from the query parameters as BILATERAL
       else{
+        //Allow normalization
+        document.getElementById("normalize-button")!.style.display = "inline-block";
 
-        // First get the reading data from the LEFT_ARM
-        this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
+        if (!this.normalized) {
+          // First get the reading data from the LEFT_ARM
+          this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
 
-          // Go through all the data and create graph data points
-          for(let i = 0; i<data.length; i++){
-            graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
-          }
+            // Go through all the data and create graph data points
+            for(let i = 0; i<data.length; i++){
+              graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+            }
 
-          // Set the chart data to the data from the accumulated points
-          this.scatterChartData[0].data = graph_data
-        })
+            //  Set the chart data to the data from the accumulated points
+            this.scatterChartData[0].data = graph_data
+          })
 
-        // Next get the reading data from the RIGHT_ARM
-        this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
+          // Next get the reading data from the RIGHT_ARM
+          this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
           
-          // Go through all the data and create graph data points
-          for(let i = 0; i<data.length; i++){
-            graph_data_bilateral[i] = {x: data[i].time, y: data[i].ppg_reading }
-          }
+            // Go through all the data and create graph data points
+            for(let i = 0; i<data.length; i++){
+              graph_data_bilateral[i] = {x: data[i].time, y: data[i].ppg_reading }
+            }
 
-          // Set the chart data to the data from the accumulated points
-          this.scatterChartData[1].data = graph_data_bilateral
-        })
+            // Set the chart data to the data from the accumulated points
+            this.scatterChartData[1].data = graph_data_bilateral
+          })
+        } else {
+            let left_origin: number;
+            let right_origin: number;
+            let left_max: number = 0;
+            let right_max: number = 0;
+          // First get the reading data from the LEFT_ARM
+          this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
+
+            left_origin = data[0].ppg_reading as number;
+            // Go through all the data and create graph data points
+            for(let i = 0; i<data.length; i++){
+              graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+              if (data[i].ppg_reading as number > left_max) {
+                left_max = data[i].ppg_reading as number;
+              }
+            }
+
+            // Set the chart data to the data from the accumulated points
+            this.scatterChartData[0].data = graph_data
+          })
+
+          // Next get the reading data from the RIGHT_ARM
+          this.reading_data_sub_bilateral = this.getReadingData(this.routed_id, "RIGHT_ARM").subscribe(data => {
+          
+            right_origin = data[0].ppg_reading as number;
+            for(let i = 0; i<data.length; i++) {
+              if (data[i].ppg_reading as number + (left_origin - right_origin) > right_max) {
+                right_max = data[i].ppg_reading as number + (left_origin - right_origin);
+              }
+            }
+            // Go through all the data and create graph data points
+            for(let i = 0; i<data.length; i++){
+              graph_data_bilateral[i] = {x: data[i].time, y: ((data[i].ppg_reading as number + (left_origin - right_origin)) * (left_max / right_max)) }
+            }
+
+            // Set the chart data to the data from the accumulated points
+            this.scatterChartData[1].data = graph_data_bilateral
+          })
+        }
       }
     }
 
@@ -329,6 +376,18 @@ export class GraphComponent implements OnInit {
     
   }
 
+  //Called upon selecting normalize
+  toggleNormalize() {
+    var norm = document.getElementById("normalize-button") as HTMLElement;
+    this.normalized = !this.normalized;
+    this.graphData();
+    if (this.normalized) {
+      norm.innerText = "Show Raw Data";
+    } else {
+      norm.innerText = "Normalize Bilateral Data";
+    }
+  }
+
   // Called when the graph button is called
   graphData(){
     // clear the existing scatter chart data if there is any (to account for going from a biltateral to unilateral reading)
@@ -345,6 +404,8 @@ export class GraphComponent implements OnInit {
 
       // If the selected laterality is not BILATERAL
       if(this.lateralites_data[this.laterality_select] != "BILATERAL"){
+        //Disable normalization
+        document.getElementById("normalize-button")!.style.display = "none";
 
         // Get the reading data from the selected reading with the seelected laterality
         this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, this.lateralites_data[this.laterality_select]).subscribe(data => {
@@ -360,25 +421,66 @@ export class GraphComponent implements OnInit {
       }
       // If the laterality is bilateral
       else{
-        // First get the reading data from the left arm
-        this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
+        //Enable normalization
+        document.getElementById("normalize-button")!.style.display = "inline-block";
+
+        if (!this.normalized) {        
+          // First get the reading data from the left arm
+          this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
+            
+  
+            // Accumulate all the data for the left arm
+            for(let i = 0; i<data.length; i++){
+              graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+            }
+            // Set all the graph data to the accumulated points
+            this.scatterChartData[0].data = graph_data
+          })
+          // Next get the reading data from the right arm
+          this.reading_data_sub_bilateral = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM").subscribe(data => {
+            // Accumulate all the data for the right arm
+            for(let i = 0; i<data.length; i++){
+              graph_data_bilateral[i] = {x: data[i].time, y: data[i].ppg_reading }
+            }
+            // Set all the graph data to the accumulated points
+            this.scatterChartData[1].data = graph_data_bilateral
+          })}
+          else {
+            let left_origin: number;
+            let right_origin: number;
+            let left_max: number = 0;
+            let right_max: number = 0;
+            // First get the reading data from the left arm
+            this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
           
-          // Accumulate all the data for the left arm
-          for(let i = 0; i<data.length; i++){
-            graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+              left_origin = data[0].ppg_reading as number;
+              // Accumulate all the data for the left arm
+              for(let i = 0; i<data.length; i++){
+                graph_data[i] = {x: data[i].time, y: data[i].ppg_reading }
+                if (data[i].ppg_reading as number > left_max) {
+                  left_max = data[i].ppg_reading as number;
+                }
+              }
+              // Set all the graph data to the accumulated points
+              this.scatterChartData[0].data = graph_data
+            })
+            // Next get the reading data from the right arm
+            this.reading_data_sub_bilateral = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM").subscribe(data => {
+
+              right_origin = data[0].ppg_reading as number;
+              for(let i = 0; i<data.length; i++) {
+                if (data[i].ppg_reading as number + (left_origin - right_origin) > right_max) {
+                  right_max = data[i].ppg_reading as number + (left_origin - right_origin);
+                }
+              }
+              // Accumulate all the data for the right arm
+              for(let i = 0; i<data.length; i++){
+                graph_data_bilateral[i] = {x: data[i].time, y: ((data[i].ppg_reading as number + (left_origin - right_origin)) * (left_max / right_max)) }
+              }
+              // Set all the graph data to the accumulated points
+              this.scatterChartData[1].data = graph_data_bilateral
+            })
           }
-          // Set all the graph data to the accumulated points
-          this.scatterChartData[0].data = graph_data
-        })
-        // Next get the reading data from the right arm
-        this.reading_data_sub_bilateral = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM").subscribe(data => {
-          // Accumulate all the data for the right arm
-          for(let i = 0; i<data.length; i++){
-            graph_data_bilateral[i] = {x: data[i].time, y: data[i].ppg_reading }
-          }
-          // Set all the graph data to the accumulated points
-          this.scatterChartData[1].data = graph_data_bilateral
-        })
       }
 
       // Change all of the select elements back to empty and reinitialize everything back to empty
@@ -426,6 +528,13 @@ export class GraphComponent implements OnInit {
     Please visit https://www.npmjs.com/package/ngx-csv for details of this library.
     about this package. 
     */
+
+    // name of the csv file when downloaded
+    var filename = this.csv_laterality + "_reading_" + this.csv_reading_id.toString()
+
+    //Title of the csv file
+    var heading = this.csv_reading_id + "reading" + (this.normalized ? "(normalized)" : "");
+
     // setting options for the CVS file
     var options = { 
       fieldSeparator: ',',
@@ -433,7 +542,7 @@ export class GraphComponent implements OnInit {
       decimalseparator: '.',
       showLabels: true, 
       showTitle: true,
-      title: "default_title",
+      title: heading,
       useBom: true,
       noDownload: false,
       headers: ["ppg", "time", "laterality"]
