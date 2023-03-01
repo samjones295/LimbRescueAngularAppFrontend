@@ -42,6 +42,7 @@ export class GraphComponent implements OnInit {
   routed_id: number | undefined
   routed_laterality: string | undefined
 
+  normalized: boolean = false;
   // SU22: Derivative Selection Variables;
   derivativeOptions: any[] = [];
   derivativeSelection: number | undefined;
@@ -137,9 +138,12 @@ export class GraphComponent implements OnInit {
 
       // Ensure the derivative selection is loaded (SU22).
       this.toggleDerivativeSelect();
+      this.toggleNormalize();
       //this.derivativeSelection = 0;
             
       if(this.routed_laterality == "BILATERAL"){
+        //document.getElementById("normalize-button")!.style.display = "inline-block";
+        
         // First get the reading data from the left arm
         this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
           this.assignLeftArmData(data,this.derivativeSelection!);
@@ -150,6 +154,8 @@ export class GraphComponent implements OnInit {
       }
       // If the laterality is left or right
       else{
+        //Disable normalization
+        //document.getElementById("normalize-button")!.style.display = "none";
       	 if(this.routed_laterality == "LEFT_ARM"){
         // First get the reading data from the left arm
         this.reading_data_sub = this.getReadingData(this.routed_id, "LEFT_ARM").subscribe(data => {
@@ -362,6 +368,16 @@ export class GraphComponent implements OnInit {
     this.derivativeOptions[1] = { value: 1, viewValue: "1st Derivative" }; 
     this.derivativeOptions[2] = { value: 2, viewValue: "2nd Derivative" }; 
   }
+  toggleNormalize() {
+    var norm = document.getElementById("normalize-button") as HTMLElement;
+    this.normalized = !this.normalized;
+    this.graphData();
+    if (this.normalized) {
+      norm.innerText = "Show Raw Data";
+    } else {
+      norm.innerText = "Normalize Bilateral Data";
+    }
+  }
   
   // Called after all three selections are made
   toggleButton(){
@@ -402,6 +418,47 @@ export class GraphComponent implements OnInit {
 
       // If the selected laterality is not BILATERAL
       if(this.lateralites_data[this.laterality_select] == "BILATERAL"){
+        document.getElementById("normalize-button")!.style.display = "inline-block";
+        if(this.normalized)
+        {
+          let left_origin: number;
+          let right_origin: number;
+          let left_max: number = 0;
+          let right_max: number = 0;
+
+          this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
+            left_origin = data[0].ppg_val as number;
+              // Accumulate all the data for the left arm
+              for(let i = 0; i<data.length; i++){
+                graph_data[i] = {x: data[i].record_time, y: data[i].ppg_val }
+                if (data[i].ppg_val as number > left_max) {
+                  left_max = data[i].ppg_val as number;
+                }
+              }
+              // Set all the graph data to the accumulated points
+              this.scatterChartData[0].data = graph_data
+            })
+            this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "RIGHT_ARM").subscribe(data => {
+
+              right_origin = data[0].ppg_val as number;
+              for(let i = 0; i<data.length; i++) {
+                if (data[i].ppg_val as number + (left_origin - right_origin) > right_max) {
+                  right_max = data[i].ppg_val as number + (left_origin - right_origin);
+                }
+              }
+              // Go through all the data and create graph data points
+              for(let i = 0; i<data.length; i++){
+                graph_data_bilateral[i] = {x: data[i].record_time, y: ((data[i].ppg_val as number + (left_origin - right_origin)) * (left_max / right_max)) }
+              }
+  
+              // Set the chart data to the data from the accumulated points
+              this.scatterChartData[1].data = graph_data_bilateral
+            })
+          
+          
+        }
+        else
+        {
         // First get the reading data from the left arm
         this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
           this.assignLeftArmData(data,this.derivativeSelection!);
@@ -410,8 +467,11 @@ export class GraphComponent implements OnInit {
           this.assignRightArmData(data,this.derivativeSelection!);     
         })
       }
+        
+      }
       // If the laterality is left or right
       else{
+        document.getElementById("normalize-button")!.style.display = "none";
       	 if(this.lateralites_data[this.laterality_select] == "LEFT_ARM"){
         // First get the reading data from the left arm
         this.reading_data_sub = this.getReadingData(this.readings_data[this.reading_select].id, "LEFT_ARM").subscribe(data => {
@@ -424,6 +484,8 @@ export class GraphComponent implements OnInit {
         })
         
         }
+       
+        
       }
 
       // Change all of the select elements back to empty and reinitialize everything back to empty
