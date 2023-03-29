@@ -19,19 +19,29 @@
         </mat-form-field>
         <mat-form-field id="laterality-select-field" appearance="fill" style="display: none;">
             <mat-label>Select Laterality</mat-label>
-            <mat-select (selectionChange)="toggleButton($event)" [(ngModel)]="laterality_select" name="laterality">
+            <mat-select (selectionChange)="toggleDerivativeSelect()" [(ngModel)]="laterality_select" name="laterality">
                 <mat-option *ngFor="let laterality of lateralites" [value]="laterality.value">
                     {{laterality.viewValue}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
+
+        <!-- Derivative Field Selector -->
+        <mat-form-field id="derivative-select-field" appearance="fill" style="display: none;">
+            <mat-label>Select Derivative</mat-label>
+            <mat-select [(ngModel)]="derivativeSelection" name="derivative">
+                <mat-option *ngFor="let options of derivativeOptions" [value]="options.value">
+                    {{options.viewValue}} 
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <!-- Derivative Field Selector End -->
+
         <div style="text-align: center;padding-bottom: 1%;">
             <button mat-raised-button color="primary" id="run-button" style= "display: none;" (click)="graphData()">View Graph</button>
             
         </div>
-        <div style="text-align: center;padding-bottom: 1%;">
-            <button mat-raised-button color="primary" id="normalize-button" style= "display: none;" (click)="toggleNormalize()">Normalize Bilateral Data</button>
-        </div>
+       
         <div style="text-align: center;padding-bottom: 1%;">
             <button mat-raised-button color="primary" id="csv-button" style= "display: none;" (click)="csvDownload()">Download {{csv_laterality}} Reading {{csv_reading_id}} as CSV</button>
         </div>
@@ -41,7 +51,7 @@
     </div>
     <div style="display: block;" >
         <div class="chart-wrapper">
-            <canvas baseChart
+            <canvas baseChart id="resultsChart"
                 [datasets]="scatterChartData"
                 [options]="scatterChartOptions"
                 [chartType]="scatterChartType">

@@ -1,0 +1,8 @@
+<h1 mat-dialog-title class="centered">Delete Reading {{data}}</h1>
+<mat-dialog-content>
+    <p> Are you sure you want to delete this reading? Click continue to remove reading.</p>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button class="mat-raised-button"(click)="close()">Exit</button>
+    <button class="mat-raised-button mat-primary"(click)="save()" type="submit">Continue</button>
+</mat-dialog-actions>

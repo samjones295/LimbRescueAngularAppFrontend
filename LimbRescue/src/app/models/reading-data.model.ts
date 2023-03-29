@@ -1,5 +1,6 @@
 export class ReadingData {
-    ppg_reading?: number;
-    time?: string;
-    laterality?: number;
+    ppg_val?: number;
+    record_time?: string;
+    laterality?: string;
+    derivative?: number;
 }

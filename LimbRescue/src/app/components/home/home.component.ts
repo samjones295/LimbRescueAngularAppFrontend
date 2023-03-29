@@ -1,6 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { AfterViewInit, Component, ViewChild, Inject } from '@angular/core';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -14,8 +14,6 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { GroupReading } from 'src/app/models/group-reading.model';
 import { Router } from '@angular/router';
 import { timer } from 'rxjs';
-import { PageSizeInfo } from 'src/app/models/page-size-info.model';
-import { PageSizeInfoService } from 'src/app/page-size-info.service';
 
 // Use these date formats for the Date Created section of the home table
 export const MY_DATE_FORMATS = {
@@ -44,7 +42,6 @@ export class HomeComponent implements AfterViewInit {
   time_left!: number;
   time_passed!: number;
   value!: number;
-  public pageSize = 10;
 
   // Definition for subscriptions
   readings_sub: any;
@@ -59,26 +56,23 @@ export class HomeComponent implements AfterViewInit {
   timer_sub: any;
 
   // Columns to be displayedint the home table
-  displayedColumns: string[] = ['select','id' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
+  displayedColumns: string[] = ['select', 'editor', 'delete' ,'patient number', 'date', 'laterality', 'show graph', 'comments'];
   dataSource: MatTableDataSource<Reading> = new MatTableDataSource();
   selection_subject = new SelectionModel<Reading>(true, []);
 
   //Define home table components
-  //@ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
+  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
   @ViewChild(MatTable) matTable!: MatTable<Reading>;
-  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
 
 
-  constructor(private router: Router, private readingService: ReadingService, private groupService: GroupService, private groupReadingService: GroupReadingService, public dialog: MatDialog, private pageSizeInfo: PageSizeInfoService) {}
+  constructor(private router: Router, private readingService: ReadingService, private groupService: GroupService, private groupReadingService: GroupReadingService, public dialog: MatDialog) {}
 
   // Ran when the page is initialized
   ngOnInit() {
     // set the data source to thetable components
-    this.paginator.pageSize = this.pageSizeInfo.getPageSizeInfo();
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    console.log(this.paginator.pageSize);
 
     // Set up the sort
     const sortState: Sort = {active: 'id', direction: 'desc'};
@@ -128,8 +122,6 @@ export class HomeComponent implements AfterViewInit {
     if(this.post_sub != undefined){
       this.post_sub.unsubscribe()
     }
-    this.pageSize = this.paginator.pageSize;
-    this.dataSource.paginator = this.paginator;
   }
 
   // Used to open the dialog to update a reading
@@ -161,6 +153,23 @@ export class HomeComponent implements AfterViewInit {
         }
       )
     })
+  }
+
+  deleteReading(id: number){
+    console.log(id);
+    const dialogRef = this.dialog.open(DeleteReadingDialog, {
+        data: id,
+        disableClose: true,
+        autoFocus: true,
+        width: '400px',
+    });
+    this.update_dialog_ref_sub = dialogRef.afterClosed().subscribe(output_data => {
+        if(output_data != undefined){
+            this.readingService.deleteReading(id).subscribe(result => {
+                console.log(result);
+            });
+        }
+    });
   }
 
   // Used to create a group
@@ -305,14 +314,6 @@ export class HomeComponent implements AfterViewInit {
     reading_ids = reading_ids.substring(0,reading_ids.length - 1)
     return reading_ids
   }
-
-  onPaginateChange(event?:PageEvent) {
-    this.pageSize = event!.pageSize;
-    this.pageSizeInfo.setPageSizeInfo(this.pageSize);
-    console.log(this.pageSizeInfo.getPageSizeInfo());
-    this.paginator.pageSize = event!.pageSize;
-    console.log(this.paginator.pageSize);
-  }
 }
 
 
@@ -327,33 +328,62 @@ export class HomeComponent implements AfterViewInit {
 })
 export class UpdateReadingDialog {
   id: string
-  patient_no: string | undefined
+  patient_num: string | undefined
   date_created: Date | undefined
   laterality: string | undefined
-  comments: string | undefined
+  notes: string | undefined
 
   form!: FormGroup
 
   constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<UpdateReadingDialog>, @Inject(MAT_DIALOG_DATA) public data: Reading) {
     this.id = data.id
-    this.patient_no = data.patient_no
+    this.patient_num = data.patient_num
     this.date_created = data.date_created
     this.laterality = data.laterality
-    this.comments = data.comments
+    this.notes = data.notes
   }
 
   ngOnInit() {
     this.form = this.fb.group({
         id: [this.id, []],
-        patient_no: [this.patient_no, []],
+        patient_num: [this.patient_num, []],
         date_created: [this.date_created, []],
         laterality: [this.laterality, []],
-        comments: [this.comments, []]
+        notes: [this.notes, []]
     });
   }
 
   save() {
     this.dialogRef.close(this.form.value);
+  }
+
+  close() {
+    this.dialogRef.close();
+  }
+}
+
+///////////////////////////////////////////////
+////         DELETE Reading Dialog         ////
+///////////////////////////////////////////////
+
+@Component({
+  selector: 'delete-reading-dialog',
+  templateUrl: 'delete-reading-dialog.html',
+  styleUrls: ['./home.component.sass'],
+})
+
+export class DeleteReadingDialog {
+  id: number
+
+  constructor(private fb: FormBuilder, private dialogRef: MatDialogRef<UpdateReadingDialog>, @Inject(MAT_DIALOG_DATA) public data: number) {
+    this.id = data
+  }
+
+  ngOnInit() {
+  }
+
+  save() {
+    this.dialogRef.close(true);
   }
 
   close() {
